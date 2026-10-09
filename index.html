@@ -407,7 +407,7 @@ const FINALS = [
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.1.4';
+const APP_VERSION = '2.1.5';
 const APP_ID = 'com.mawe.fragekampen';
 const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
@@ -912,7 +912,7 @@ function finalQHTML(){
     <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
     <p class="bigq">${esc(S.game.final.q)}</p>
     ${timerHTML()}
-    <div class="row"><button class="cta" data-act="freveal">Visa svaret</button></div>
+    <div class="row"><button class="cta" data-act="freveal">Visa svaret</button><button class="ghost" data-act="nyfinal">Redan fått – ny fråga</button></div>
   </section>`;
 }
 
@@ -941,8 +941,8 @@ function endHTML(){
 
 function modalHTML(){
   const o = S.open; if (!o) return '';
-  const R = curRound(), cat = R.cats[o.c], [q,a,id] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
-  const meta = `<div class="qmeta"><span>${esc(cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
+  const R = curRound(), cat = R.cats[o.c], [q,a,id,egenKat] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
+  const meta = `<div class="qmeta"><span>${esc(egenKat || cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
     <p class="who">${asker} läser upp för ${who}</p>`;
   let body;
   if (o.phase === 'dbl') {
@@ -952,11 +952,11 @@ function modalHTML(){
   } else {
     body = `<p class="qtext">${esc(q)}</p>`;
     if (o.phase === 'q') {
-      body += timerHTML() + `<div class="row"><button class="cta" data-act="reveal">Visa svaret</button></div>`;
+      body += timerHTML() + `<div class="row"><button class="cta" data-act="reveal">Visa svaret</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
       body += `<div><button class="plain" data-act="cancel">Stäng utan att använda rutan</button></div>`;
     } else {
       body += `<p class="atext">Svar: <b>${esc(a)}</b></p>`;
-      body += `<p class="who">Svarade ${who} rätt?</p><div class="row"><button class="pbtn" data-act="dres" data-v="1">Rätt, +${pts}</button><button class="pbtn alt" data-act="dres" data-v="0">Fel</button></div>`;
+      body += `<p class="who">Svarade ${who} rätt?</p><div class="row"><button class="pbtn" data-act="dres" data-v="1">Rätt, +${pts}</button><button class="pbtn alt" data-act="dres" data-v="0">Fel</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
       body += D.slangda.has(id)
         ? `<p class="who">Frågan är slängd och kommer inte tillbaka</p>`
         : `<div><button class="plain warn" data-act="slangq" data-id="${esc(id)}">${armBtn('slangq', 'Fel i frågan eller svaret? Släng den', 'Släng frågan för gott? Tryck igen')}</button></div>`;
@@ -1082,8 +1082,9 @@ function render(bevaraFalt){
     + (installEvent && !arApp() ? ` <button class="ghost" data-act="installera" style="margin-left:8px">Installera som app</button>` : '');
   if (!VIEW) {
     const openKey = S.screen === 'final-q' ? 'final' : (S.open && S.open.phase === 'q' ? `${S.round}-${S.open.c}-${S.open.r}` : null);
-    if (openKey && openKey !== lastOpenKey) timerStart(openKey === 'final' ? FSECS : QSECS);
+    if (openKey && (openKey !== lastOpenKey || nyTimer)) timerStart(openKey === 'final' ? FSECS : QSECS);
     else if (!openKey) timerStop();
+    nyTimer = false;
     lastOpenKey = openKey;
     paintTimer();
   }
@@ -1108,6 +1109,20 @@ function arApp(){
 }
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvent = e; render(true); });
 window.addEventListener('appinstalled', () => { installEvent = null; toast('Frågekampen är installerad som app'); render(true); });
+/* "Redan fått": frågan markeras som spelad (så den aldrig kommer tillbaka) och
+   byts mot en ospelad fråga – helst i samma kategori och på samma nivå, annars
+   närmaste nivå, annars en ospelad fråga från en annan kategori. */
+function idnISpelet(){
+  const s = new Set(S.game.rounds.flat().flatMap(c => c.q.map(x => x[2])));
+  s.add(S.game.final.id); return s;
+}
+function ersattning(katNamn, niva, utom){
+  const narmast = lista => { if (!lista.length) return null; const b = Math.min(...lista.map(f => Math.abs(f.niva - niva))); return shuffle(lista.filter(f => Math.abs(f.niva - niva) === b))[0]; };
+  const ny = f => !D.spelade.has(f.id) && !utom.has(f.id);
+  const k = katNamn && kategorier().find(x => norm(x.t) === norm(katNamn));
+  return (k && narmast(k.fr.filter(ny))) || narmast(pool().filter(ny));
+}
+let nyTimer = false;
 function closeQ(){ S.used[S.round].push(S.open.c+'-'+S.open.r); S.open = null; }
 function arm(name){ confirmArm = name; clearTimeout(confirmTimer); confirmTimer = setTimeout(()=>{ confirmArm = null; render(true); }, 3000); }
 function markeraSpelad(id){ if (id && !D.spelade.has(id)) { D.spelade.add(id); saveD(); enq('POST', '/spelade', { ids:[id] }); } }
@@ -1186,6 +1201,24 @@ document.addEventListener('click', e => {
       markeraSpelad(curRound().cats[o.c].q[o.r][2]);
       S.turn = vem; closeQ(); break; }
     case 'cancel': snap('Stäng frågan'); S.open = null; break;
+    case 'nyfraga': {
+      const o = S.open, kat = curRound().cats[o.c], gammal = kat.q[o.r];
+      const f = ersattning(kat.t, o.r + 1, idnISpelet());
+      if (!f) { toast('Det finns inga ospelade frågor kvar. Skapa fler i Frågebanken.'); return; }
+      snap('Ny fråga i stället för: ' + gammal[0]);
+      markeraSpelad(gammal[2]);
+      kat.q[o.r] = [f.q, f.a, f.id].concat(norm(f.kat) !== norm(kat.t) ? [f.kat] : []);
+      o.phase = 'q'; nyTimer = true;
+      toast('Ny fråga – den förra kommer inte tillbaka'); break; }
+    case 'nyfinal': {
+      const utom = idnISpelet(), gammal = S.game.final;
+      let f = shuffle(FINALER.filter(x => !D.spelade.has(x.id) && !utom.has(x.id)))[0];
+      if (!f) { const p = ersattning(null, 5, utom); f = p && p.niva >= 3 ? p : null; }
+      if (!f) { toast('Det finns inga ospelade frågor kvar. Skapa fler i Frågebanken.'); return; }
+      snap('Ny finalfråga i stället för: ' + gammal.q);
+      markeraSpelad(gammal.id);
+      S.game.final = { id:f.id, cat:f.kat, q:f.q, a:f.a }; nyTimer = true;
+      toast('Ny finalfråga – den förra kommer inte tillbaka'); break; }
     case 'adjust': snap(S.adjust ? 'Klar med poängen' : 'Justera poäng'); S.adjust = !S.adjust; break;
     case 'adj': snap(`${+el.dataset.d > 0 ? '+' : '−'}100 för ${S.names[p]}`); S.scores[p] += +el.dataset.d; break;
     case 'next':
