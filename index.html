@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Frågekampen</title>
+<meta name="description" content="Frågespel för sex spelare runt bordet">
+<meta name="theme-color" content="#0f2a26">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Frågekampen">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: spelbord i mörkgrön filt – spelplan överst, sex stolar (poängtavla) under, frågan läggs som ett kort ovanpå */
+:root{
+  --felt:#0f2a26; --felt-2:#16362f; --felt-3:#1f4a41; --line:#2c564c;
+  --card:#f1e4c3; --card-ink:#2b2014; --brass:#d9a845; --coral:#ec6a4c;
+  --ink:#f3eddf; --muted:#a3bbb2; --good:#7fd18e; --bad:#ec6a4c; --card-edge:#b89c62; --card-label:#7a5a24;
+  --f-display:'Bungee','Impact','Arial Black',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background-color:var(--felt);color:var(--ink);margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.45;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -5%,var(--felt-3) 0%,transparent 70%);background-attachment:fixed}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:18px 96px;display:flex;flex-direction:column;gap:20px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+
+/* Topp */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,5vw,40px);color:var(--brass);letter-spacing:.02em;line-height:1;margin:0}
+.brand small{display:block;font-family:var(--f-body);font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:6px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:8px 12px;font-size:14px;font-weight:600}
+.ghost:hover{color:var(--ink);border-color:var(--muted)}
+.ghost.warn{color:var(--coral);border-color:var(--coral)}
+.pill{display:inline-flex;align-items:center;gap:8px}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.pill.ok .dot{background:var(--good)}
+.pill.wait .dot{background:var(--brass)}
+.pill.err .dot{background:var(--coral)}
+
+/* Statusrad */
+.status{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.round{font-family:var(--f-display);font-size:clamp(16px,3vw,22px);color:var(--ink)}
+.turn{font-size:17px;color:var(--muted)}
+.turn b{color:var(--brass);font-weight:800}
+
+/* Spelplan */
+.board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,1vw,10px)}
+.cat{min-height:3.6em;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:6px 4px;border-bottom:3px solid var(--brass);font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;font-size:clamp(9px,1.5vw,15px);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+.cell{aspect-ratio:4/3;max-width:100%;background:var(--card);color:var(--card-ink);font-family:var(--f-display);
+  font-size:clamp(13px,3.4vw,36px);font-variant-numeric:tabular-nums;box-shadow:0 3px 0 var(--card-edge);
+  transition:transform .12s ease, box-shadow .12s ease;display:flex;align-items:center;justify-content:center;padding:0}
+.cell:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--card-edge)}
+.cell.used{background:transparent;color:transparent;box-shadow:none;border:1px dashed var(--line);cursor:default;transform:none;opacity:1}
+
+.banner{background:var(--felt-2);border:1px solid var(--brass);border-radius:14px;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.banner p{margin:0;font-weight:600}
+.cta{background:var(--brass);color:var(--card-ink);font-weight:800;padding:12px 20px;font-size:16px}
+.cta:hover{filter:brightness(1.08)}
+.cta.coral{background:var(--coral);color:#fff}
+
+/* Stolarna */
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.seat{background:var(--felt-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.seat.active{border-color:var(--brass);box-shadow:0 0 0 2px var(--brass) inset}
+.seat.asking{border-color:var(--muted);border-style:dashed}
+.seat.asking .lbl{color:var(--muted)}
+.seat .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .sc{font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.seat .sc.neg{color:var(--coral)}
+.seat .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);font-weight:800;min-height:1.2em}
+.adj{display:flex;gap:6px;margin-top:4px}
+.adj button{flex:1;background:var(--felt);color:var(--ink);border:1px solid var(--line);padding:4px 0;font-weight:700;font-size:14px}
+
+/* Paneler och formulär */
+.panel{background:var(--felt-2);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:18px;min-width:0}
+.panel h2{font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.6vw,28px);margin:0;color:var(--brass)}
+.panel h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:800}
+.panel p{margin:0}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.names label,.field{display:flex;flex-direction:column;gap:4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;min-width:0}
+.names input,.bets input,.field input,.field select{font:inherit;font-size:17px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--felt);color:var(--ink);text-transform:none;letter-spacing:0;width:100%}
+.field small{font-size:13px;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.rules{margin:0;padding-left:1.2em;color:var(--muted);max-width:68ch;display:flex;flex-direction:column;gap:4px}
+.rules b{color:var(--ink)}
+.note{color:var(--muted)}
+.note b{color:var(--brass)}
+.note.warn{color:var(--coral);font-weight:600}
+.note.good{color:var(--good);font-weight:600}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+
+/* Tabeller */
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;background:var(--felt)}
+td.num,th.num{text-align:right}
+tr:last-child td{border-bottom:0}
+td.first{color:var(--brass);font-weight:800}
+.genlist{display:flex;flex-direction:column;gap:8px}
+.genq{display:grid;grid-template-columns:2.2em 1fr auto;gap:10px;align-items:center;background:var(--felt);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.genq .lv{font-family:var(--f-display);color:var(--brass);text-align:center}
+.genq .tx{min-width:0}
+.genq .tx b{display:block;font-weight:700}
+.genq .tx span{color:var(--muted)}
+
+/* Frågekortet */
+.overlay{position:fixed;inset:0;background:rgba(6,20,17,.86);display:flex;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:10;overflow-y:auto}
+.qcard{background:var(--card);color:var(--card-ink);border-radius:18px;width:100%;max-width:780px;padding:clamp(18px,4vw,40px);display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);margin:auto}
+.qmeta{display:flex;justify-content:space-between;gap:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:var(--card-label)}
+.qtext{font-size:clamp(22px,4vw,38px);font-weight:800;line-height:1.2;text-wrap:balance;margin:0}
+.atext{font-size:clamp(18px,3vw,26px);background:var(--felt);color:var(--ink);border-radius:12px;padding:14px 16px;margin:0}
+.atext b{color:var(--brass)}
+.timer{display:flex;align-items:center;gap:12px}
+.track{flex:1;height:10px;border-radius:99px;background:#d9c9a3;overflow:hidden}
+.fill{height:100%;width:100%;background:var(--felt-3)}
+.fill.out{background:var(--coral)}
+.secs{font-family:var(--f-display);font-size:20px;min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
+.tbtn{background:transparent;border:1px solid var(--card-edge);color:var(--card-ink);padding:6px 10px;font-weight:700;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.who{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--card-label);margin:0}
+.pbtn{background:var(--felt);color:var(--ink);padding:10px 14px;font-weight:700}
+.pbtn:hover{background:var(--felt-3)}
+.pbtn.alt{background:transparent;color:var(--card-ink);border:1px solid var(--card-edge)}
+.plain{background:transparent;color:#6b5634;text-decoration:underline;padding:8px 4px;font-weight:600}
+.plain.warn{color:#b0402a}
+.double{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.double .big{font-family:var(--f-display);font-size:clamp(44px,10vw,90px);color:var(--coral);line-height:1;margin:0}
+
+/* Final */
+.bets{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.bets label{display:flex;flex-direction:column;gap:4px;font-weight:700}
+.bets small{color:var(--muted);font-weight:400}
+.judge{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.jrow{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--felt);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.jrow span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tog{display:flex;gap:6px}
+.tog button{padding:6px 12px;font-weight:800;background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tog .on.y{background:var(--good);color:var(--card-ink);border-color:var(--good)}
+.tog .on.n{background:var(--bad);color:#fff;border-color:var(--bad)}
+.bigq{font-size:clamp(22px,4vw,36px);font-weight:800;line-height:1.2;margin:0;text-wrap:balance}
+
+/* Slut */
+.podium{display:flex;flex-direction:column;gap:8px}
+.place{display:grid;grid-template-columns:3.2em 1fr auto;align-items:center;gap:12px;background:var(--felt);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.place.p1{background:var(--brass);color:var(--card-ink);border-color:var(--brass)}
+.place .pos{font-family:var(--f-display);font-size:22px}
+.place .pn{font-weight:800;font-size:18px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.place .ps{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+
+/* Ångra och meddelanden */
+.undo{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:10px;
+  background:var(--ink);color:var(--card-ink);padding:10px 16px 10px 12px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:calc(100vw - 32px)}
+.undo .ar{font-family:var(--f-display);font-size:22px;line-height:1}
+.undo .tx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
+.undo .tx b{font-weight:800}
+.undo .tx span{font-size:12px;color:#5b5240;max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--felt-3);color:var(--ink);border:1px solid var(--brass);
+  padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">Frågekampen<small>Sex stolar · två omgångar · en final</small></h1>
+    <div class="tools" id="tools"></div>
+  </header>
+  <main id="main"></main>
+  <p class="foot" id="foot"></p>
+</div>
+<div id="modal"></div>
+<div id="undo"></div>
+<div id="toast"></div>
+<datalist id="kanda"></datalist>
+<script>
+/* Frågebank: 18 kategorier × 10 frågor, två per svårighetsnivå (1–5).
+   Varje spel drar 12 kategorier och en fråga per nivå. Spelade frågor sparas så att nästa spel får nya. */
+const BANK = [
+  { t:'Sverige runt', q:[
+    [1,'Vilken är Sveriges största sjö?','Vänern'],
+    [1,'I vilken stad ligger nöjesparken Liseberg?','Göteborg'],
+    [2,'Vilken bro förbinder Malmö med Köpenhamn?','Öresundsbron'],
+    [2,'Vilken är Sveriges största ö?','Gotland'],
+    [3,'Vad heter Sveriges högsta berg?','Kebnekaise (numera är nordtoppen högst, sedan glaciären på sydtoppen smält)'],
+    [3,'I vilket landskap ligger Mora och Siljan?','Dalarna'],
+    [4,'Vilken stad kallas "ruinernas och rosornas stad"?','Visby'],
+    [4,'Vilken kanal, invigd 1832, förbinder Vänern med Östersjön?','Göta kanal'],
+    [5,'Hur många landskap har Sverige?','25'],
+    [5,'Vilken är Sveriges nordligaste stad?','Kiruna'] ]},
+  { t:'80-talet', q:[
+    [1,'Vilken leksak med sex färgade sidor blev en världsdille kring 1980?','Rubiks kub'],
+    [1,'Vilken amerikansk TV-serie om oljefamiljen Ewing i Texas blev en jättesuccé?','Dallas'],
+    [2,'Vilket år vann Herreys Eurovision med "Diggi-Loo Diggi-Ley"?','1984'],
+    [2,'Vilket år mördades statsminister Olof Palme?','1986'],
+    [3,'Vilket datorspel med fallande block skapades i Sovjetunionen 1984?','Tetris'],
+    [3,'Vilken kärnkraftsolycka inträffade i Sovjetunionen i april 1986?','Tjernobyl'],
+    [4,'Vilket företag lanserade den bärbara kassettspelaren Walkman?','Sony'],
+    [4,'Vilken svensk vann Franska öppna i tennis 1982, bara 17 år gammal?','Mats Wilander'],
+    [5,'Vilken film av Lasse Hallström från 1985 blev Oscarsnominerad?','Mitt liv som hund'],
+    [5,'Vilken TV-kanal blev Sveriges första reklamfinansierade när den började sända via satellit 1987?','TV3'] ]},
+  { t:'Mat & dryck', q:[
+    [1,'Vilken frukt är huvudingrediensen i guacamole?','Avokado'],
+    [1,'Vilket bär blir sylten man äter till köttbullar?','Lingon'],
+    [2,'Vilken dag äter man traditionellt semlor?','Fettisdagen'],
+    [2,'Vad heter den italienska efterrätten med mascarpone och kaffedoppade kex?','Tiramisu'],
+    [3,'Vad kallas japanskt risvin?','Sake'],
+    [3,'Vilken fisk är surströmming gjord på?','Strömming (östersjösill)'],
+    [4,'Vilken krydda ger curry dess gula färg?','Gurkmeja'],
+    [4,'Vad heter den grekiska såsen med yoghurt, gurka och vitlök?','Tzatziki'],
+    [5,'Från vilket land kommer osten Manchego?','Spanien (regionen La Mancha)'],
+    [5,'Vilken krydda är världens dyraste räknat per vikt?','Saffran'] ]},
+  { t:'Sport', q:[
+    [1,'Hur många spelare har ett fotbollslag på planen samtidigt?','11'],
+    [1,'Hur många ringar har den olympiska symbolen?','5'],
+    [2,'I vilken sport tävlar man om Stanley Cup?','Ishockey'],
+    [2,'I vilken sport pratar man om "birdie" och "eagle"?','Golf'],
+    [3,'Vilken stad arrangerade sommar-OS 1912?','Stockholm'],
+    [3,'Vilket land vann fotbolls-VM 2014?','Tyskland'],
+    [4,'Hur lång är ett maratonlopp?','42,195 km'],
+    [4,'Vilken svensk slalomåkare vann 86 världscuptävlingar?','Ingemar Stenmark'],
+    [5,'Vilken svensk tog OS-guld i höjdhopp i Aten 2004?','Stefan Holm'],
+    [5,'I vilken stad hölls vinter-OS 1994?','Lillehammer'] ]},
+  { t:'Film & TV', q:[
+    [1,'Vem skrev böckerna om Pippi Långstrump?','Astrid Lindgren'],
+    [1,'Vad heter Kalle Ankas tre brorsöner?','Knatte, Fnatte och Tjatte'],
+    [2,'Vilken film från 1997 handlar om ett fartyg som sjönk 1912?','Titanic'],
+    [2,'Vilken författare skapade kommissarie Kurt Wallander?','Henning Mankell'],
+    [3,'I vilken fiktiv stad bor familjen Simpson?','Springfield'],
+    [3,'Vilket år visades Kalle Anka på julafton i svensk TV för första gången?','1960'],
+    [4,'Vilken svensk skådespelerska vann Oscar för både "Anastasia" och "Mordet på Orientexpressen"?','Ingrid Bergman'],
+    [4,'Vilken bokstav kallas James Bonds chef?','M'],
+    [5,'Vilket år hade "Sällskapsresan" premiär?','1980'],
+    [5,'Vem regisserade "Fanny och Alexander"?','Ingmar Bergman'] ]},
+  { t:'Natur & vetenskap', q:[
+    [1,'Vilken planet kallas den röda planeten?','Mars'],
+    [1,'Vilket är jordens största däggdjur?','Blåvalen'],
+    [2,'Hur många ben har en spindel?','8'],
+    [2,'Vid hur många grader Celsius kokar vatten vid havsytan?','100'],
+    [3,'Vilket är människokroppens största organ?','Huden'],
+    [3,'Vad kallas processen där växter gör energi av solljus?','Fotosyntes'],
+    [4,'Vilket grundämne har den kemiska beteckningen Au?','Guld'],
+    [4,'Vilken stjärna ligger närmast jorden?','Solen'],
+    [5,'Vilken gas utgör största delen av jordens atmosfär?','Kväve (cirka 78 %)'],
+    [5,'Vilket grundämne har atomnummer 1?','Väte'] ]},
+  { t:'Världen', q:[
+    [1,'Vilken är världens största ocean?','Stilla havet'],
+    [1,'I vilken stad står Eiffeltornet?','Paris'],
+    [2,'Vilken flod rinner genom Kairo?','Nilen'],
+    [2,'Vilket land har flest invånare i världen?','Indien'],
+    [3,'I vilket land ligger Machu Picchu?','Peru'],
+    [3,'Vad heter Kanadas huvudstad?','Ottawa'],
+    [4,'Vad heter Australiens huvudstad?','Canberra'],
+    [4,'Vilket är världens minsta land till ytan?','Vatikanstaten'],
+    [5,'Vilket land har flest tidszoner?','Frankrike (tack vare sina utomeuropeiska territorier)'],
+    [5,'Vilken är världens längsta bergskedja på land?','Anderna'] ]},
+  { t:'Musik', q:[
+    [1,'Vilken svensk grupp vann Eurovision 1974 med "Waterloo"?','ABBA'],
+    [1,'Vilket instrument är Jimi Hendrix mest känd för?','Elgitarr'],
+    [2,'Vem kallades "The King of Pop"?','Michael Jackson'],
+    [2,'Vilken svensk artist vann Eurovision 2012 med "Euphoria"?','Loreen'],
+    [3,'I vilket band var Freddie Mercury sångare?','Queen'],
+    [3,'Vilka fyra var med i The Beatles?','John Lennon, Paul McCartney, George Harrison och Ringo Starr'],
+    [4,'Vilka två bildade Roxette?','Per Gessle och Marie Fredriksson'],
+    [4,'Vilken kompositör skrev sin nionde symfoni trots att han var döv?','Ludwig van Beethoven'],
+    [5,'Vilken svensk låtskrivare och producent ligger bakom "...Baby One More Time" och "I Kissed a Girl"?','Max Martin'],
+    [5,'Vem sjöng "Främling" i Melodifestivalen 1983?','Carola'] ]},
+  { t:'Historia', q:[
+    [1,'Vilket år föll Berlinmuren?','1989'],
+    [1,'Vilket år började andra världskriget?','1939'],
+    [2,'Vilket år landade människan för första gången på månen?','1969'],
+    [2,'Vem var USA:s första president?','George Washington'],
+    [3,'Vilket regalskepp sjönk i Stockholm 1628 på sin jungfrufärd?','Vasa'],
+    [3,'Vilket år nådde Columbus Amerika?','1492'],
+    [4,'Vilken svensk kung stupade vid Lützen 1632?','Gustav II Adolf'],
+    [4,'Vilket år blev Sverige medlem i EU?','1995'],
+    [5,'Vilket år gick Sverige över till högertrafik (Dagen H)?','1967'],
+    [5,'Vilken svensk drottning abdikerade 1654 och flyttade till Rom?','Kristina'] ]},
+  { t:'Ord & språk', q:[
+    [1,'Vad kallas ett ord med motsatt betydelse, som "varm" och "kall"?','Antonym'],
+    [1,'Fyll i ordspråket: "Gå som katten kring het …"','gröt'],
+    [2,'Vad kallas ett ord som läses likadant baklänges, som "kajak"?','Palindrom'],
+    [2,'Vad heter "tack" på finska?','Kiitos'],
+    [3,'Vad betyder det latinska uttrycket "carpe diem"?','Fånga dagen'],
+    [3,'Vad kallas ord som låter likadant men stavas olika, som "jul" och "hjul"?','Homofoner'],
+    [4,'Vilket svenskt ord har blivit internationellt för en person som granskar myndigheter för medborgarnas räkning?','Ombudsman'],
+    [4,'Vilket är det officiella språket i Brasilien?','Portugisiska'],
+    [5,'Hur många bokstäver har det svenska alfabetet?','29'],
+    [5,'Vilket språk har flest modersmålstalare i världen?','Mandarin (kinesiska)'] ]},
+  { t:'Svenskt påhitt', q:[
+    [1,'Vilket möbelföretag grundades av Ingvar Kamprad?','IKEA'],
+    [1,'Vilken svensk musiktjänst med grön logga grundades 2006?','Spotify'],
+    [2,'Vilken svensk uppfann dynamiten?','Alfred Nobel'],
+    [2,'Vilket svenskt företag har byggt både stridsflygplanet Gripen och bilen 900?','Saab'],
+    [3,'Vilket bilmärke införde trepunktsbältet som standard 1959?','Volvo (uppfinnare: Nils Bohlin)'],
+    [3,'Vilket svenskt spelföretag skapade Minecraft?','Mojang'],
+    [4,'Vem har gett namn åt temperaturskalan där vatten kokar vid 100 grader?','Anders Celsius'],
+    [4,'Vilken klädkedja grundade Erling Persson i Västerås 1947?','H&M (då Hennes)'],
+    [5,'Vilket svenskt företag blev känt för mjölkförpackningar formade som en pyramid (tetraeder)?','Tetra Pak'],
+    [5,'Vilken svensk ingenjör konstruerade pacemakern som opererades in första gången 1958?','Rune Elmqvist (opererad av Åke Senning)'] ]},
+  { t:'Blandat', q:[
+    [1,'Vilken veckodag är uppkallad efter guden Tor?','Torsdag'],
+    [1,'Hur många dagar har ett skottår?','366'],
+    [2,'Hur många kort finns i en vanlig kortlek utan jokrar?','52'],
+    [2,'Vilken färg har en smaragd?','Grön'],
+    [3,'Vilket år blev Carl XVI Gustaf kung?','1973'],
+    [3,'Hur många nollor har en miljard?','9'],
+    [4,'Hur många rutor har ett schackbräde?','64'],
+    [4,'Vilket tal står den romerska siffran L för?','50'],
+    [5,'Vilken är den enda bokstaven som inte finns i något av USA:s delstatsnamn?','Q'],
+    [5,'På vilket slott bor kungafamiljen sedan 1981?','Drottningholms slott'] ]},
+  { t:'90-talet', q:[
+    [1,'Vilken placering tog Sveriges herrlandslag i fotbolls-VM i USA 1994?','Trea (brons)'],
+    [1,'Vilket digitalt husdjur i form av ett ägg blev en dille 1997?','Tamagotchi'],
+    [2,'Vilken svensk grupp slog igenom världen över med "All That She Wants" 1992?','Ace of Base'],
+    [2,'Vad heter Segas snabba blå igelkott från 1991?','Sonic'],
+    [3,'Vilket år blev Nelson Mandela Sydafrikas president?','1994'],
+    [3,'Vad hette det berömda klonade fåret som föddes 1996?','Dolly'],
+    [4,'Vilket år delades Tjeckoslovakien i Tjeckien och Slovakien?','1993'],
+    [4,'Vem var Sveriges statsminister 1991–1994?','Carl Bildt'],
+    [5,'Till hur många procent höjde Riksbanken marginalräntan under kronkrisen i september 1992?','500 %'],
+    [5,'Vilket år röstade svenskarna ja till EU-medlemskap i en folkomröstning?','1994'] ]},
+  { t:'Djur', q:[
+    [1,'Vilket är världens snabbaste landdjur?','Geparden'],
+    [1,'Hur många ben har en insekt?','6'],
+    [2,'Vilken fågel kan flyga baklänges?','Kolibrin'],
+    [2,'Vilket är Sveriges största rovdjur?','Brunbjörnen'],
+    [3,'Vilket är det enda däggdjuret som kan flyga på riktigt?','Fladdermusen'],
+    [3,'Vad äter jättepandan nästan uteslutande?','Bambu'],
+    [4,'Hur många hjärtan har en bläckfisk?','3'],
+    [4,'Vad kallas en sälunge?','Kut'],
+    [5,'Ungefär hur länge är en elefant dräktig?','Cirka 22 månader'],
+    [5,'Vad heter världens största ödla?','Komodovaran'] ]},
+  { t:'Rymden', q:[
+    [1,'Vilken planet ligger närmast solen?','Merkurius'],
+    [1,'Vilken är solsystemets största planet?','Jupiter'],
+    [2,'Vilken planet är mest känd för sina ringar?','Saturnus'],
+    [2,'Hur många planeter finns i vårt solsystem?','8'],
+    [3,'Vem var den första människan att gå på månen?','Neil Armstrong'],
+    [3,'Vad heter galaxen vi bor i?','Vintergatan'],
+    [4,'Vem blev 1961 den första människan i rymden?','Jurij Gagarin'],
+    [4,'Vilken himlakropp slutade räknas som planet 2006?','Pluto'],
+    [5,'Ungefär hur lång tid tar det för solljuset att nå jorden?','Cirka 8 minuter'],
+    [5,'Vad heter den stora spiralgalax som är Vintergatans närmaste större granne?','Andromedagalaxen'] ]},
+  { t:'Litteratur', q:[
+    [1,'Vem skrev böckerna om Harry Potter?','J.K. Rowling'],
+    [1,'Vilken detektiv bor på Baker Street 221B?','Sherlock Holmes'],
+    [2,'Vem skrev Millennium-trilogin?','Stieg Larsson'],
+    [2,'Vem skapade Mumintrollen?','Tove Jansson'],
+    [3,'Vem skrev romanen "1984"?','George Orwell'],
+    [3,'Vem skrev "Hundraåringen som klev ut genom fönstret och försvann"?','Jonas Jonasson'],
+    [4,'Vem blev 1909 den första kvinnan att få Nobelpriset i litteratur?','Selma Lagerlöf'],
+    [4,'Vad heter Vilhelm Mobergs romanserie om emigranter till Amerika?','Utvandrarna (Utvandrarserien)'],
+    [5,'Vilken svensk poet fick Nobelpriset i litteratur 2011?','Tomas Tranströmer'],
+    [5,'Vem skrev "Brott och straff"?','Fjodor Dostojevskij'] ]},
+  { t:'Kroppen', q:[
+    [1,'Hur många tänder har en vuxen människa, visdomständerna inräknade?','32'],
+    [1,'Vilket organ pumpar runt blodet i kroppen?','Hjärtat'],
+    [2,'Vilket är kroppens längsta ben?','Lårbenet'],
+    [2,'Vilka organ renar blodet och bildar urin?','Njurarna'],
+    [3,'Vilken blodgrupp kallas universalgivare?','O negativ'],
+    [3,'Vad heter kroppens minsta ben, som sitter i örat?','Stigbygeln'],
+    [4,'Vad heter kroppens största muskel?','Stora sätesmuskeln'],
+    [4,'Vilket vitamin bildar huden med hjälp av solljus?','D-vitamin'],
+    [5,'Ungefär hur många liter blod har en vuxen människa?','Cirka 5 liter'],
+    [5,'Vilket ämne i de röda blodkropparna transporterar syre?','Hemoglobin'] ]},
+  { t:'Teknik & prylar', q:[
+    [1,'Vilket företag tillverkar iPhone?','Apple'],
+    [1,'Vilket socialt nätverk grundade Mark Zuckerberg 2004?','Facebook'],
+    [2,'Vad står "www" för?','World Wide Web'],
+    [2,'Vilket företag skapade spelkonsolen PlayStation?','Sony'],
+    [3,'Vilket år lanserades den första iPhonen?','2007'],
+    [3,'Vad står förkortningen GPS för?','Global Positioning System'],
+    [4,'Vad står förkortningen USB för?','Universal Serial Bus'],
+    [4,'Vilket matematiskt ord – en etta följd av 100 nollor – gav Google dess namn?','Googol'],
+    [5,'Vem räknas som världens första programmerare, på 1840-talet?','Ada Lovelace'],
+    [5,'Vilket år skickades det första sms:et?','1992'] ]}
+];
+const FINALS = [
+  { cat:'Rymden', q:'Vem blev år 2006 den förste svensken i rymden?', a:'Christer Fuglesang' },
+  { cat:'Sverige', q:'Vilket år invigdes Globen (Avicii Arena) i Stockholm?', a:'1989' },
+  { cat:'Världen', q:'Vilken är Europas längsta flod?', a:'Volga' },
+  { cat:'Historia', q:'Vilket år röstade kvinnor för första gången i ett svenskt riksdagsval?', a:'1921' },
+  { cat:'Kroppen', q:'Hur många ben har en vuxen människa?', a:'206' },
+  { cat:'Konst', q:'Vilken svensk konstnär målade monumentalmålningen "Midvinterblot"?', a:'Carl Larsson' }
+];
+
+/* ===================== Grund ===================== */
+const APP_VERSION = '2.0.0';
+const APP_ID = 'com.mawe.fragekampen';
+const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
+const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
+const QSECS = 30, FSECS = 60;
+const GEMINI_MODELLER = ['gemini-flash-latest','gemini-flash-lite-latest','gemini-3.5-flash-lite','gemini-3.1-flash-lite'];
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { for (let i=a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+/* Samma normalisering och hash som Homey-appen (lib/store.js). Ändras den ena
+   måste den andra ändras likadant – annars får samma fråga olika id. */
+function norm(s){ return String(s || '').toLowerCase().normalize('NFC').replace(/[^a-z0-9åäöéüæø]+/g, ' ').trim(); }
+function hash(s){ let h = 0x811c9dc5; const t = norm(s); for (let i=0; i<t.length; i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); }
+
+function lsGet(k, def){ try { const v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); } catch(e) { return def; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e) { return false; } }
+/* Utkorg och Homey-uppgifter deklareras här uppe: fresh() → buildGame() kan
+   behöva lägga något i utkorgen redan när sidan laddas. */
+const CRED_KEY = 'fk-homey';
+let OUT = lsGet('fk-utkorg', []);
+if (!Array.isArray(OUT)) OUT = [];
+let flushing = false, flushTimer = 0, HSTAT = 'av', HTEXT = '';
+const STORAGE_OK = (() => { try { localStorage.setItem('fk-test','1'); const ok = localStorage.getItem('fk-test') === '1'; localStorage.removeItem('fk-test'); return ok; } catch(e) { return false; } })();
+
+/* ===================== Frågorna ===================== */
+/* Varje fråga får ett id av sin egen text. Tidigare var id:t platsen i listan
+   ("3-7"), och då bytte frågor id så fort en kategori lades till. LEG översätter
+   de gamla id:na så att spelade frågor från version 1.x följer med. */
+const LEG = {};
+const INBYGGDA = [];
+BANK.forEach((c, ci) => c.q.forEach((x, qi) => {
+  const id = 'b-' + hash(x[1]);
+  LEG[ci + '-' + qi] = id;
+  INBYGGDA.push({ id, kat:c.t, niva:x[0], q:x[1], a:x[2] });
+}));
+const FINALER = FINALS.map((f, i) => { const id = 'f-' + hash(f.q); LEG['f-' + i] = id; return { id, kat:f.cat, q:f.q, a:f.a }; });
+/* De 60 frågorna + finalen som fanns i version 1.0 och 1.1, innan frågebanken kom */
+const ORIGINAL = [...Array(12).keys()].flatMap(c => [0,2,4,6,8].map(i => LEG[c+'-'+i])).concat(LEG['f-0']);
+
+/* D speglar dokumentet i Homey. Det ligger också lokalt, så spelet fungerar
+   precis som förut när Homey inte går att nå. */
+const D = (() => {
+  const raa = lsGet('fk-data', {});
+  return { spelade:new Set(raa.spelade || []), slangda:new Set(raa.slangda || []), egna:raa.egna || [], resultat:raa.resultat || [], spelare:raa.spelare || [] };
+})();
+function saveD(){ lsSet('fk-data', { spelade:[...D.spelade], slangda:[...D.slangda], egna:D.egna, resultat:D.resultat, spelare:D.spelare }); }
+let migrerad = false;
+(function migrera(){
+  if (lsGet('fk-migr-3', false)) return;
+  const gamla = lsGet('fragekampen-spelade', []);
+  (Array.isArray(gamla) ? gamla : []).forEach(id => { const ny = LEG[id]; if (ny) D.spelade.add(ny); });
+  try {
+    if (localStorage.getItem('fragekampen-v1') !== null && !localStorage.getItem('fragekampen-migrerad')) ORIGINAL.forEach(id => D.spelade.add(id));
+  } catch(e) {}
+  migrerad = true; saveD(); lsSet('fk-migr-3', true);
+})();
+
+function pool(){ return INBYGGDA.concat(D.egna).filter(f => !D.slangda.has(f.id)); }
+function kategorier(){
+  const m = new Map();
+  for (const f of pool()) {
+    const k = norm(f.kat); if (!k) continue;
+    if (!m.has(k)) m.set(k, { t:f.kat, fr:[] });
+    m.get(k).fr.push(f);
+  }
+  return [...m.values()];
+}
+const ospelade = k => k.fr.filter(f => !D.spelade.has(f.id)).length;
+const ospeladeTotalt = () => pool().filter(f => !D.spelade.has(f.id)).length;
+
+function valjFraga(fr, niva, tagna){
+  const fri = fr.filter(f => !tagna.has(f.id));
+  const nya = fri.filter(f => !D.spelade.has(f.id));
+  const avst = f => Math.abs(f.niva - niva);
+  for (const lista of [nya.filter(f => f.niva === niva), nya, fri.filter(f => f.niva === niva), fri]) {
+    if (!lista.length) continue;
+    const bast = Math.min(...lista.map(avst));
+    return shuffle(lista.filter(f => avst(f) === bast))[0];
+  }
+  return null;
+}
+function buildGame(){
+  let recycled = false;
+  if (ospeladeTotalt() < 60) {
+    const behall = [...D.spelade].filter(id => id.startsWith('f-'));
+    D.spelade = new Set(behall); saveD(); recycled = true;
+    enq('POST', '/nollstall', { vad:'spelade', behall });
+  }
+  /* Flest ospelade först, slumpad ordning bland lika. Att välja helt slumpat
+     bland alla med minst fem ospelade lämnade ojämna rester, så tredje spelet
+     fick upprepningar trots att 60 frågor fanns kvar. */
+  const kats = shuffle(kategorier().filter(k => k.fr.length >= 5)).sort((a,b) => ospelade(b) - ospelade(a));
+  const pick = shuffle(kats.slice(0, 12));
+  const iSpelet = new Set();
+  const mk = k => ({ t:k.t, q:[1,2,3,4,5].map(l => {
+    const f = valjFraga(k.fr, l, iSpelet); iSpelet.add(f.id);
+    return [f.q, f.a, f.id];
+  })});
+  const rundor = [pick.slice(0,6).map(mk), pick.slice(6,12).map(mk)];
+  let final = shuffle(FINALER.filter(f => !D.spelade.has(f.id)))[0];
+  if (!final) {
+    const svar = shuffle(pool().filter(f => f.niva >= 4 && !D.spelade.has(f.id) && !iSpelet.has(f.id))).sort((a,b) => b.niva - a.niva)[0];
+    final = svar ? { id:svar.id, kat:svar.kat, q:svar.q, a:svar.a } : shuffle(FINALER.slice())[0];
+  }
+  return { rounds:rundor, final:{ id:final.id, cat:final.kat, q:final.q, a:final.a }, recycled };
+}
+
+/* ===================== Spelläget ===================== */
+const KEY = 'fragekampen-v3';
+function pickDoubles(){
+  const c1 = Math.floor(Math.random()*6);
+  let c2 = Math.floor(Math.random()*5); if (c2 >= c1) c2++;
+  return [c1+'-'+(1+Math.floor(Math.random()*4)), c2+'-'+(1+Math.floor(Math.random()*4))];
+}
+function fresh(names){
+  return { v:3, id:uid(), t:0, game:buildGame(), screen:'setup', names:(names || (D.spelare.length === 6 ? D.spelare : DEF)).slice(), scores:[0,0,0,0,0,0],
+    rf:[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]], turn:0, round:0, used:[[],[]], dbl:[pickDoubles(),pickDoubles()], open:null,
+    bets:[0,0,0,0,0,0], fres:[null,null,null,null,null,null], adjust:false };
+}
+function migreraSpel(g){
+  /* Ett pågående spel från version 1.2–1.3 får nya id och de fält som saknas. */
+  if (!g || g.v !== 2 || !g.game) return null;
+  g.game.rounds.forEach(r => r.forEach(c => c.q.forEach(x => { x[2] = LEG[x[2]] || ('b-' + hash(x[0])); })));
+  g.game.final.id = LEG[g.game.final.id] || ('f-' + hash(g.game.final.q));
+  return Object.assign(g, { v:3, id:uid(), t:0, rf:[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]] });
+}
+let S = lsGet(KEY, null);
+if (!S || S.v !== 3) S = migreraSpel(lsGet('fragekampen-v2', null)) || fresh();
+function saveS(){ lsSet(KEY, S); }
+
+const val = r => STEPS[S.round] * (r+1);
+const curRound = () => ({ name:RNAMES[S.round], step:STEPS[S.round], cats:S.game.rounds[S.round] });
+const isDbl = (c,r) => S.dbl[S.round].includes(c+'-'+r);
+const isUsed = (c,r) => S.used[S.round].includes(c+'-'+r);
+const ans = () => (S.turn + 1) % 6;
+const roundDone = () => S.used[S.round].length >= 30;
+
+/* ===================== Ångra ===================== */
+/* Före varje tryck som ändrar spelet sparas en kopia av läget. Ångra lägger
+   tillbaka den. Stacken ligger lokalt, så den överlever att sidan laddas om. */
+let UNDO = lsGet('fk-angra', []);
+if (!Array.isArray(UNDO)) UNDO = [];
+function snap(label){ UNDO.push({ s:JSON.stringify(S), l:label }); if (UNDO.length > 40) UNDO.shift(); lsSet('fk-angra', UNDO); }
+function undo(){
+  const e = UNDO.pop(); if (!e) return;
+  lsSet('fk-angra', UNDO);
+  S = JSON.parse(e.s);
+  toast('Ångrade: ' + e.l);
+}
+
+/* ===================== Homey ===================== */
+function cred(){
+  let c = lsGet(CRED_KEY, null);
+  /* Samma webbplats som dashboarden: finns uppgifterna redan där används de. */
+  if (!c || !c.token) { const d = lsGet('homeycred_v1', null); if (d && d.token && d.homeyId) c = { token:d.token, homeyId:d.homeyId, lan:d.lan || '', fran:'dashboarden' }; }
+  return Object.assign({ token:'', homeyId:'', lan:'' }, c || {});
+}
+const credOk = () => { const c = cred(); return !!(c.token && c.homeyId); };
+function homeyLokalHttps(ip){
+  const m = String(ip || '').match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  return m ? ('https://' + m.slice(1).join('-') + '.homey.homeylocal.com') : '';
+}
+function vagar(){
+  const c = cred(), ut = [];
+  if (c.lan) {
+    let u = c.lan.trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(u)) u = 'http://' + u;
+    /* En https-sida får inte anropa http. Därför Homeys eget https-namn för samma IP. */
+    if (location.protocol === 'https:' && /^http:\/\//i.test(u)) u = homeyLokalHttps(u.replace(/^http:\/\//i, '').split(/[:/]/)[0]);
+    if (u) ut.push(u);
+  }
+  if (c.homeyId) ut.push('https://' + c.homeyId + '.connect.athom.com');
+  const sist = lsGet('fk-vag', '');
+  if (sist && ut.includes(sist)) { ut.splice(ut.indexOf(sist), 1); ut.unshift(sist); }
+  return ut;
+}
+function felMed(kod, text){ const e = new Error(text); e.kod = kod; return e; }
+async function homey(method, vag, body, appVag){
+  const c = cred();
+  if (!c.token || !c.homeyId) throw felMed('konf', 'Homey är inte inställd');
+  let sist = felMed('natet', 'Homey svarar inte');
+  for (const bas of vagar()) {
+    const ctl = new AbortController(), tid = setTimeout(() => ctl.abort(), 10000);
+    try {
+      const r = await fetch(bas + (appVag === false ? '' : '/api/app/' + APP_ID) + vag, {
+        method, cache:'no-store', signal:ctl.signal,
+        headers: Object.assign({ Authorization:'Bearer ' + c.token }, body ? { 'Content-Type':'application/json' } : {}),
+        body: body ? JSON.stringify(body) : undefined });
+      clearTimeout(tid);
+      if (r.status === 401 || r.status === 403) throw felMed('token', 'Homey godkände inte token');
+      if (r.status === 404) { sist = felMed('saknas', 'Appen Frågekampen hittades inte i Homey'); continue; }
+      if (r.status >= 500) { sist = felMed('natet', 'Homey svarade ' + r.status); continue; }
+      if (!r.ok) throw felMed('svar', 'Homey svarade ' + r.status);
+      lsSet('fk-vag', bas);
+      let j = null; try { j = await r.json(); } catch(e) {}
+      if (j && typeof j === 'object' && !Array.isArray(j) && 'result' in j && Object.keys(j).length === 1) j = j.result;
+      return j;
+    } catch(e) {
+      clearTimeout(tid);
+      if (e.kod === 'token' || e.kod === 'svar') throw e;
+      if (e.kod !== 'saknas' && e.kod !== 'natet') sist = felMed('natet', 'Homey svarar inte');
+    }
+  }
+  throw sist;
+}
+
+/* Utkorgen: allt som ska till Homey läggs här först och skickas i ordning.
+   Är Homey borta ligger det kvar och skickas nästa gång. */
+HSTAT = credOk() ? 'wait' : 'av';
+function enq(m, p, b, slaIhop){
+  if (slaIhop) OUT = OUT.filter(o => o.k !== slaIhop);
+  OUT.push({ m, p, b, k:slaIhop || null });
+  lsSet('fk-utkorg', OUT);
+  clearTimeout(flushTimer); flushTimer = setTimeout(flush, 800);
+}
+function sattStatus(s, t){ HSTAT = s; HTEXT = t || ''; const el = document.getElementById('hpill'); if (el) el.outerHTML = pillHTML(); }
+async function flush(){
+  if (flushing || !credOk()) return;
+  flushing = true;
+  try {
+    while (OUT.length) {
+      const o = OUT[0];
+      try { await homey(o.m, o.p, o.b); OUT.shift(); lsSet('fk-utkorg', OUT); sattStatus('ok'); }
+      catch(e) {
+        if (e.kod === 'svar') { OUT.shift(); lsSet('fk-utkorg', OUT); continue; }   /* felaktigt anrop: släng, annars fastnar kön */
+        sattStatus(e.kod === 'natet' ? 'wait' : 'err', e.message); break;
+      }
+    }
+  } finally { flushing = false; }
+}
+async function pull(){
+  if (!credOk()) { sattStatus('av'); return; }
+  let d;
+  try { d = await homey('GET', '/data'); }
+  catch(e) { sattStatus(e.kod === 'natet' ? 'wait' : 'err', e.message); return; }
+  if (!d || typeof d !== 'object') return;
+  const vantar = new Set(OUT.filter(o => o.p === '/resultat').map(o => o.b.id));
+  const raderas = new Set(OUT.filter(o => o.p === '/resultat-bort').map(o => o.b.id));
+  const lokalaSpelade = [...D.spelade].filter(id => !(d.spelade || []).includes(id));
+  (d.spelade || []).forEach(id => D.spelade.add(id));
+  if (lokalaSpelade.length) enq('POST', '/spelade', { ids:lokalaSpelade });
+  const lokalaSlangda = [...D.slangda].filter(id => !(d.slangda || []).includes(id));
+  (d.slangda || []).forEach(id => D.slangda.add(id));
+  lokalaSlangda.forEach(id => enq('POST', '/slang', { id }));
+  const serverEgna = new Set((d.egna || []).map(f => f.id));
+  const lokalaEgna = D.egna.filter(f => !serverEgna.has(f.id) && !D.slangda.has(f.id));
+  D.egna = (d.egna || []).concat(lokalaEgna);
+  if (lokalaEgna.length && !OUT.some(o => o.p === '/fragor')) enq('POST', '/fragor', { fragor:lokalaEgna, kanda:INBYGGDA.map(f => f.id) });
+  const serverRes = new Set((d.resultat || []).map(r => r.id));
+  D.resultat = (d.resultat || []).filter(r => !raderas.has(r.id)).concat(D.resultat.filter(r => vantar.has(r.id) && !serverRes.has(r.id)));
+  if (Array.isArray(d.spelare) && d.spelare.length) D.spelare = d.spelare;
+  saveD();
+  /* Ett spel som fortsatt på en annan enhet tas över. */
+  if (d.spel && d.spel.v === 3 && (d.spelT || 0) > (S.t || 0)) { S = d.spel; saveS(); UNDO = []; lsSet('fk-angra', UNDO); toast('Spelet hämtades från Homey'); }
+  else if (S.screen === 'setup' && D.spelare.length === 6 && S.names.every((n,i) => n === DEF[i])) { S.names = D.spelare.slice(); saveS(); }
+  sattStatus('ok');
+  render(true);
+  flush();
+}
+
+/* ===================== Resultat och statistik ===================== */
+function rader(){ return S.names.map((n,i) => ({ namn:n, poang:S.scores[i], ratt:S.rf[i][0], fel:S.rf[i][1] })); }
+/* Resultatet speglar läget: står spelet på slutsidan finns det, annars inte.
+   Då blir ångra efter "Räkna ihop" rätt av sig självt. */
+function stammaResultat(){
+  const finns = D.resultat.find(r => r.id === S.id);
+  if (S.screen === 'end') {
+    const r = { id:S.id, at:finns ? finns.at : Date.now(), rader:rader() };
+    if (finns && JSON.stringify(finns.rader) === JSON.stringify(r.rader)) return;
+    D.resultat = D.resultat.filter(x => x.id !== S.id).concat(r); saveD();
+    enq('POST', '/resultat', r);
+  } else if (finns) {
+    D.resultat = D.resultat.filter(x => x.id !== S.id); saveD();
+    OUT = OUT.filter(o => !(o.p === '/resultat' && o.b.id === S.id)); lsSet('fk-utkorg', OUT);
+    enq('POST', '/resultat-bort', { id:S.id });
+  }
+}
+function statistik(){
+  const m = new Map();
+  for (const r of D.resultat) {
+    const max = Math.max(...r.rader.map(x => x.poang));
+    for (const x of r.rader) {
+      const k = norm(x.namn); if (!k) continue;
+      if (!m.has(k)) m.set(k, { namn:x.namn, spel:0, vinster:0, summa:0, basta:-Infinity, ratt:0, fel:0 });
+      const e = m.get(k);
+      e.spel++; e.summa += x.poang; e.basta = Math.max(e.basta, x.poang); e.ratt += x.ratt || 0; e.fel += x.fel || 0;
+      if (x.poang === max) e.vinster++;
+    }
+  }
+  return [...m.values()].sort((a,b) => b.vinster - a.vinster || (b.summa/b.spel) - (a.summa/a.spel));
+}
+function kandaNamn(){ const s = new Set(D.spelare); D.resultat.forEach(r => r.rader.forEach(x => s.add(x.namn))); return [...s].filter(n => n && !DEF.includes(n)); }
+
+/* ===================== Släng fråga ===================== */
+function slangFraga(id){
+  if (!id) return;
+  D.slangda.add(id); D.egna = D.egna.filter(f => f.id !== id); saveD();
+  enq('POST', '/slang', { id });
+}
+
+/* ===================== Skapa frågor (Gemini) ===================== */
+let GEN = { kor:false, text:'', nya:[] };
+async function geminiNycklar(){
+  const egen = lsGet('fk-gemini', '');
+  const ut = [];
+  if (credOk()) {
+    try {
+      const raa = await homey('GET', '/api/manager/logic/variable/', null, false);
+      const alla = Array.isArray(raa) ? raa : Object.values(raa || {});
+      for (const n of ['gemini_api_key', 'gemini_api_key_2']) { const v = alla.find(x => x && x.name === n); if (v && v.value) ut.push(String(v.value).trim()); }
+    } catch(e) {}
+  }
+  if (egen) ut.push(egen);
+  return ut;
+}
+function tolkaFragor(text){
+  let j = null;
+  try { j = JSON.parse(text); } catch(e) {
+    const a = text.indexOf('['), b = text.lastIndexOf(']');
+    if (a >= 0 && b > a) { try { j = JSON.parse(text.slice(a, b+1)); } catch(e2) {} }
+  }
+  if (j && !Array.isArray(j) && Array.isArray(j.fragor)) j = j.fragor;
+  if (!Array.isArray(j)) return [];
+  return j.map(x => ({
+    kat: String(x.kategori || x.kat || '').trim(),
+    niva: Math.round(Number(x.niva ?? x['nivå'] ?? x.level)),
+    q: String(x.fraga || x['fråga'] || x.question || '').trim(),
+    a: String(x.svar || x.answer || '').trim()
+  })).filter(x => x.kat && x.q && x.a && x.niva >= 1 && x.niva <= 5);
+}
+function byggPrompt(kat, antal){
+  const allaKat = kategorier().map(k => k.t);
+  const perNiva = Math.max(1, Math.round(antal / 5));
+  const finns = shuffle(pool().filter(f => !kat || norm(f.kat) === norm(kat)).map(f => f.q)).slice(0, 150);
+  return [
+    `Skriv ${antal} frågesportsfrågor på svenska till ett frågespel för vuxna i Sverige mellan 34 och 65 år.`,
+    kat ? `Alla frågor ska höra till kategorin "${kat}".`
+        : `Fördela frågorna jämnt på några av dessa befintliga kategorier: ${allaKat.join(', ')}. Använd kategorinamnen exakt som de står.`,
+    `Svårighet 1–5: 1 = nästan alla vet, 3 = allmänbildad vet, 5 = svår men rättvis. Gör ${perNiva} frågor per svårighetsnivå${kat ? '' : ' och kategori'}.`,
+    'Varje fråga ska ha ett entydigt, kort och faktamässigt säkert svar (helst 1–4 ord). Ta bara med frågor där du är helt säker på svaret.',
+    'Inga flervalsfrågor, inga frågor om saker som kan ha ändrats de senaste åren, och inga frågor som avslöjar svaret.',
+    finns.length ? 'Dessa frågor finns redan och får inte upprepas eller omformuleras:\n- ' + finns.join('\n- ') : '',
+    'Svara ENBART med en JSON-lista: [{"kategori":"...","niva":1,"fraga":"...","svar":"..."}]'
+  ].filter(Boolean).join('\n\n');
+}
+async function genereraFragor(kat, antal){
+  if (GEN.kor) return;
+  GEN = { kor:true, text:'Hämtar nyckeln…', nya:[] }; render(true);
+  try {
+    const nycklar = await geminiNycklar();
+    if (!nycklar.length) throw new Error('Ingen Gemini-nyckel. Anslut Homey (Logic-variabeln gemini_api_key) eller klistra in en nyckel nedan.');
+    GEN.text = 'Skriver frågor… det tar ofta 10–30 sekunder.'; render(true);
+    const prompt = byggPrompt(kat, antal);
+    let text = null, sistFel = '';
+    ute: for (const nyckel of nycklar) for (const modell of GEMINI_MODELLER) {
+      try {
+        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + modell + ':generateContent', {
+          method:'POST', headers:{ 'Content-Type':'application/json', 'x-goog-api-key':nyckel },
+          body: JSON.stringify({ contents:[{ role:'user', parts:[{ text:prompt }] }], generationConfig:{ temperature:0.9, responseMimeType:'application/json' } }) });
+        if (!r.ok) { sistFel = modell + ' svarade ' + r.status; if (r.status === 400 || r.status === 403) continue ute; continue; }
+        const j = await r.json();
+        text = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(p => p.text || '').join('');
+        if (text) break ute;
+      } catch(e) { sistFel = modell + ': ' + (e.message || 'nätverksfel'); }
+    }
+    if (!text) throw new Error('Gemini svarade inte (' + sistFel + ').');
+    const kanda = new Set(pool().map(f => f.id.slice(2)).concat([...D.slangda].map(id => id.slice(2))));
+    const nya = [];
+    for (const f of tolkaFragor(text)) {
+      const h = hash(f.q); if (kanda.has(h)) continue; kanda.add(h);
+      if (kat) f.kat = kat;
+      const befintlig = kategorier().find(k => norm(k.t) === norm(f.kat));
+      if (befintlig) f.kat = befintlig.t;
+      nya.push(Object.assign({ id:'e-' + h, at:Date.now() }, f));
+    }
+    if (!nya.length) throw new Error('Alla frågor Gemini föreslog fanns redan eller gick inte att läsa. Försök igen.');
+    D.egna = D.egna.concat(nya); saveD();
+    enq('POST', '/fragor', { fragor:nya, kanda:INBYGGDA.map(f => f.id) });
+    GEN = { kor:false, text:`${nya.length} nya frågor sparade. Släng de som inte håller.`, nya, ok:true };
+  } catch(e) {
+    GEN = { kor:false, text:e.message || 'Något gick fel', nya:[], fel:true };
+  }
+  render(true);
+}
+
+/* ===================== Timer ===================== */
+const T = { dur:QSECS, left:QSECS, run:false, last:0, raf:0 };
+let actx = null;
+function beep(){
+  try {
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = 330; o.type = 'square'; g.gain.value = .08;
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + .5);
+  } catch(e) {}
+}
+function timerStart(d){ T.dur = d; T.left = d; T.run = true; T.last = performance.now(); cancelAnimationFrame(T.raf); T.raf = requestAnimationFrame(tick); }
+function timerStop(){ T.run = false; cancelAnimationFrame(T.raf); }
+function tick(now){
+  if (!T.run) return;
+  T.left = Math.max(0, T.left - (now - T.last)/1000); T.last = now;
+  paintTimer();
+  if (T.left <= 0) { T.run = false; beep(); paintTimer(); return; }
+  T.raf = requestAnimationFrame(tick);
+}
+function paintTimer(){
+  const f = document.getElementById('tfill'), s = document.getElementById('tsecs'), b = document.getElementById('tbtn');
+  if (!f) return;
+  f.style.width = (T.left / T.dur * 100) + '%';
+  f.classList.toggle('out', T.left <= 0);
+  s.textContent = T.left <= 0 ? '0' : Math.ceil(T.left);
+  b.textContent = T.left <= 0 ? 'Starta om' : (T.run ? 'Pausa' : 'Fortsätt');
+}
+function timerHTML(){
+  return `<div class="timer"><div class="track"><div class="fill" id="tfill"></div></div>
+    <span class="secs" id="tsecs">${QSECS}</span><button class="tbtn" id="tbtn" data-act="timer">Pausa</button></div>`;
+}
+
+/* ===================== Rendering ===================== */
+let VIEW = null;          /* null = spelet, annars 'stats', 'bank' eller 'homey' */
+let confirmArm = null, confirmTimer = 0, toastTimer = 0;
+function toast(t){
+  const el = document.getElementById('toast'); if (!el) return;
+  el.innerHTML = `<div class="toast" role="status">${esc(t)}</div>`;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.innerHTML = ''; }, 3200);
+}
+function armBtn(namn, text, sakerText){ return confirmArm === namn ? (sakerText || 'Säker? Tryck igen') : text; }
+
+function seatsHTML(highlight){
+  return `<section class="seats" aria-label="Poängställning">${S.names.map((n,i)=>`
+    <div class="seat${highlight && i===ans() ? ' active' : ''}${highlight && i===S.turn ? ' asking' : ''}">
+      <span class="lbl">${!highlight ? '' : i===S.turn ? 'Frågar' : i===ans() ? 'Svarar' : ''}</span>
+      <span class="nm">${esc(n)}</span>
+      <span class="sc${S.scores[i]<0?' neg':''}">${S.scores[i]}</span>
+      ${S.adjust ? `<div class="adj"><button data-act="adj" data-p="${i}" data-d="-100">−100</button><button data-act="adj" data-p="${i}" data-d="100">+100</button></div>` : ''}
+    </div>`).join('')}</section>`;
+}
+
+function setupHTML(){
+  const egna = D.egna.filter(f => !D.slangda.has(f.id)).length;
+  return `<section class="panel">
+    <h2>Vilka sitter vid bordet?</h2>
+    <div class="names">${S.names.map((n,i)=>`<label for="p${i}">Stol ${i+1}<input id="p${i}" value="${esc(n)}" maxlength="18" autocomplete="off" list="kanda"></label>`).join('')}</div>
+    <ul class="rules">
+      <li>Sätt er i stolsordning runt bordet. <b>En frågar, och den som sitter efter svarar.</b></li>
+      <li>Den som svarar väljer kategori och poäng. Den som frågar håller i skärmen, läser upp frågan och visar svaret.</li>
+      <li>Rätt svar ger poängen, fel svar ger noll. Sedan går frågandet ett steg vidare: den som nyss svarade frågar nästa person.</li>
+      <li>Två rutor per omgång är <b>Dubbel</b> och ger dubbla poäng.</li>
+      <li>Omgång 2 ger dubbla värden. I <b>finalen</b> svarar alla och satsar poäng innan frågan visas. Fel svar kostar insatsen.</li>
+      <li>Tryckte någon fel? <b>Ångra</b> nere till vänster tar tillbaka senaste trycket.</li>
+    </ul>
+    <p class="note">Frågebanken: <b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade${egna ? `, varav ${egna} egna` : ''}. Varje spel drar 60 nya.${S.game.recycled ? ' Alla frågor hade använts, så banken har börjat om.' : ''}</p>
+    ${STORAGE_OK ? '' : '<p class="note warn">Den här webbläsaren låter inte spelet spara något. Öppna spelet i Chrome eller Safari i stället för i en förhandsvisning.</p>'}
+    ${ORIGINAL.some(id => !D.spelade.has(id)) && !D.resultat.length ? '<div class="row"><button class="ghost" data-act="markold">Vi har redan spelat de första frågorna (version 1.0–1.1)</button></div>' : ''}
+    <div class="row"><button class="cta" data-act="start">Starta spelet</button></div>
+  </section>`;
+}
+
+function boardHTML(){
+  const R = curRound();
+  let h = `<div class="status"><span class="round">${R.name}</span>
+    <span class="turn">${esc(S.names[S.turn])} frågar → <b>${esc(S.names[ans()])}</b> svarar och väljer ruta</span></div>
+    <section class="board" aria-label="Spelplan">`;
+  R.cats.forEach(c => h += `<div class="cat">${esc(c.t)}</div>`);
+  for (let r=0; r<5; r++) for (let c=0; c<6; c++) {
+    const u = isUsed(c,r);
+    h += `<button class="cell${u?' used':''}" id="cell-${c}-${r}" ${u?'disabled aria-label="Använd"':`data-act="cell" data-c="${c}" data-r="${r}" aria-label="${esc(R.cats[c].t)} för ${val(r)}"`}>${u?'':val(r)}</button>`;
+  }
+  h += `</section>`;
+  if (roundDone()) h += `<div class="banner"><p>${R.name} är klar!</p><button class="cta" data-act="next">${S.round===0?'Till omgång 2':'Till finalen'}</button></div>`;
+  return h + seatsHTML(true);
+}
+
+function finalBetHTML(){
+  return `<section class="panel">
+    <h2>Finalen · ${esc(S.game.final.cat)}</h2>
+    <p class="note">Alla satsar i hemlighet (skriv på en lapp), sedan fyller programledaren i insatserna. Max är dina poäng – den som har under 500 får satsa upp till 500.</p>
+    <div class="bets">${S.names.map((n,i)=>{const mx=Math.max(S.scores[i],500);return `<label for="bet${i}">${esc(n)} <small>har ${S.scores[i]} · max ${mx}</small><input id="bet${i}" type="number" inputmode="numeric" min="0" max="${mx}" step="100" value="${S.bets[i]||0}"></label>`}).join('')}</div>
+    <div class="row"><button class="cta coral" data-act="fshow">Visa finalfrågan</button></div>
+  </section>${seatsHTML(false)}`;
+}
+
+function finalQHTML(){
+  return `<section class="panel">
+    <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
+    <p class="bigq">${esc(S.game.final.q)}</p>
+    ${timerHTML()}
+    <div class="row"><button class="cta" data-act="freveal">Visa svaret</button></div>
+  </section>`;
+}
+
+function finalJudgeHTML(){
+  const ready = S.fres.every(x => x !== null);
+  return `<section class="panel">
+    <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
+    <p class="bigq">${esc(S.game.final.q)}</p>
+    <p class="atext">Svar: <b>${esc(S.game.final.a)}</b></p>
+    <div class="judge">${S.names.map((n,i)=>`<div class="jrow"><span>${esc(n)} · ${S.bets[i]}</span>
+      <div class="tog"><button class="${S.fres[i]===true?'on y':''}" data-act="fres" data-p="${i}" data-v="1">Rätt</button>
+      <button class="${S.fres[i]===false?'on n':''}" data-act="fres" data-p="${i}" data-v="0">Fel</button></div></div>`).join('')}</div>
+    <div class="row"><button class="cta" data-act="fscore" ${ready?'':'disabled'}>Räkna ihop</button></div>
+  </section>`;
+}
+
+function endHTML(){
+  const order = S.names.map((n,i)=>({n, s:S.scores[i], r:S.rf[i]})).sort((a,b)=>b.s-a.s);
+  let pos = 0;
+  return `<section class="panel"><h2>Slutställning</h2><div class="podium">${order.map((p,i)=>{
+      if (i===0 || p.s !== order[i-1].s) pos = i+1;
+      return `<div class="place${pos===1?' p1':''}"><span class="pos">${pos}:a</span><span class="pn">${esc(p.n)} <small style="font-weight:600;opacity:.7">· ${p.r[0]} rätt</small></span><span class="ps">${p.s}</span></div>`;
+    }).join('')}</div>
+    <div class="row"><button class="cta" data-act="again">Spela igen med samma namn</button><button class="ghost" data-act="view" data-v="stats">Se statistiken</button></div></section>`;
+}
+
+function modalHTML(){
+  const o = S.open; if (!o) return '';
+  const R = curRound(), cat = R.cats[o.c], [q,a,id] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
+  const meta = `<div class="qmeta"><span>${esc(cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
+    <p class="who">${asker} läser upp för ${who}</p>`;
+  let body;
+  if (o.phase === 'dbl') {
+    body = `<div class="double"><p class="big">Dubbel!</p>
+      <p style="margin:0;font-size:18px">Rätt svar ger <b>${who}</b> dubbla poäng: <b>${pts}</b>.</p>
+      <button class="cta coral" data-act="dblgo">Visa frågan</button></div>`;
+  } else {
+    body = `<p class="qtext">${esc(q)}</p>`;
+    if (o.phase === 'q') {
+      body += timerHTML() + `<div class="row"><button class="cta" data-act="reveal">Visa svaret</button></div>`;
+      body += `<div><button class="plain" data-act="cancel">Stäng utan att använda rutan</button></div>`;
+    } else {
+      body += `<p class="atext">Svar: <b>${esc(a)}</b></p>`;
+      body += `<p class="who">Svarade ${who} rätt?</p><div class="row"><button class="pbtn" data-act="dres" data-v="1">Rätt, +${pts}</button><button class="pbtn alt" data-act="dres" data-v="0">Fel</button></div>`;
+      body += D.slangda.has(id)
+        ? `<p class="who">Frågan är slängd och kommer inte tillbaka</p>`
+        : `<div><button class="plain warn" data-act="slangq" data-id="${esc(id)}">${armBtn('slangq', 'Fel i frågan eller svaret? Släng den', 'Släng frågan för gott? Tryck igen')}</button></div>`;
+    }
+  }
+  return `<div class="overlay" role="dialog" aria-modal="true" aria-label="Fråga"><div class="qcard">${meta}${body}</div></div>`;
+}
+
+/* ----- Statistik ----- */
+function statsHTML(){
+  const st = statistik();
+  const senaste = D.resultat.slice(-10).reverse();
+  const dag = t => new Date(t).toLocaleDateString('sv-SE', { day:'numeric', month:'short', year:'numeric', timeZone:'Europe/Stockholm' });
+  return `<section class="panel"><h2>Statistik</h2>
+    ${st.length ? `<div class="tblwrap"><table><thead><tr><th>Spelare</th><th class="num">Spel</th><th class="num">Vinster</th><th class="num">Snitt</th><th class="num">Bästa</th><th class="num">Rätt svar</th></tr></thead><tbody>
+      ${st.map((e,i) => `<tr><td class="${i===0?'first':''}">${esc(e.namn)}</td><td class="num">${e.spel}</td><td class="num">${e.vinster}</td><td class="num">${Math.round(e.summa/e.spel)}</td><td class="num">${e.basta}</td><td class="num">${e.ratt+e.fel ? Math.round(100*e.ratt/(e.ratt+e.fel))+' %' : '–'}</td></tr>`).join('')}
+    </tbody></table></div>` : '<p class="note">Inga spel är avslutade än. Statistiken fylls i när ni trycker Räkna ihop i finalen.</p>'}
+    ${senaste.length ? `<h3>Senaste spelen</h3><div class="tblwrap"><table><thead><tr><th>Datum</th><th>Vinnare</th><th class="num">Poäng</th><th>Spelare</th></tr></thead><tbody>
+      ${senaste.map(r => { const max = Math.max(...r.rader.map(x=>x.poang)); const v = r.rader.filter(x=>x.poang===max).map(x=>x.namn);
+        return `<tr><td>${dag(r.at)}</td><td class="first">${esc(v.join(' & '))}</td><td class="num">${max}</td><td>${esc(r.rader.map(x=>x.namn).join(', '))}</td></tr>`; }).join('')}
+    </tbody></table></div>` : ''}
+    <p class="note">${credOk() ? 'Statistiken sparas i Homey och syns på alla enheter.' : 'Statistiken sparas bara i den här webbläsaren tills Homey är anslutet.'}</p>
+    <div class="row"><button class="ghost${confirmArm==='nollstat'?' warn':''}" data-act="nollstat">${armBtn('nollstat','Nollställ statistiken')}</button></div>
+  </section>`;
+}
+
+/* ----- Frågebanken ----- */
+function bankHTML(){
+  const kats = kategorier().sort((a,b) => a.t.localeCompare(b.t, 'sv'));
+  const egna = D.egna.filter(f => !D.slangda.has(f.id)).length;
+  const harEgenNyckel = !!lsGet('fk-gemini', '');
+  return `<section class="panel"><h2>Frågebanken</h2>
+    <p class="note"><b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade · ${INBYGGDA.length} inbyggda, ${egna} egna · ${D.slangda.size} slängda · ${kats.length} kategorier</p>
+    <div class="split">
+      <div class="panel" style="padding:16px;gap:12px">
+        <h3>Skapa fler frågor</h3>
+        <div class="fields">
+          <label class="field" for="gen-kat">Kategori
+            <select id="gen-kat"><option value="">Blandat – fyll på befintliga</option>${kats.map(k => `<option value="${esc(k.t)}">${esc(k.t)}</option>`).join('')}</select></label>
+          <label class="field" for="gen-ny">Eller en ny kategori<input id="gen-ny" maxlength="30" autocomplete="off" placeholder="t.ex. Göteborg"></label>
+          <label class="field" for="gen-antal">Antal
+            <select id="gen-antal"><option>10</option><option selected>20</option><option>30</option></select></label>
+        </div>
+        <div class="row"><button class="cta" data-act="gen" ${GEN.kor?'disabled':''}>${GEN.kor?'Skapar…':'Skapa frågor'}</button></div>
+        ${GEN.text ? `<p class="note ${GEN.fel?'warn':GEN.ok?'good':''}" role="status">${esc(GEN.text)}</p>` : ''}
+        <p class="note">Gemini skriver frågorna. Nyckeln hämtas från Logic-variabeln <b>gemini_api_key</b> i Homey${harEgenNyckel ? ', med den inklistrade som reserv' : ''}. En ny kategori behöver minst 5 frågor för att hamna på spelplanen.</p>
+        <label class="field" for="gen-nyckel">Egen Gemini-nyckel <small>(valfritt – bara om Homey saknar den)</small><input id="gen-nyckel" type="password" autocomplete="off" spellcheck="false" placeholder="${harEgenNyckel?'sparad – skriv en ny för att byta':'AIza…'}"></label>
+      </div>
+      <div class="panel" style="padding:16px;gap:12px">
+        <h3>Kategorier</h3>
+        <div class="tblwrap"><table><thead><tr><th>Kategori</th><th class="num">Ospelade</th><th class="num">Totalt</th></tr></thead><tbody>
+          ${kats.map(k => `<tr><td>${esc(k.t)}${k.fr.some(f=>f.id.startsWith('e-'))?' <small style="color:var(--brass)">egna</small>':''}</td><td class="num">${ospelade(k)}</td><td class="num">${k.fr.length}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+    </div>
+    ${GEN.nya.length ? `<h3>Nyss skapade</h3><div class="genlist">${GEN.nya.map(f => `<div class="genq"><span class="lv" title="Svårighet">${f.niva}</span>
+      <span class="tx"><b>${esc(f.q)}</b><span>${esc(f.a)} · ${esc(f.kat)}</span></span>
+      ${D.slangda.has(f.id) ? '<span class="note">Slängd</span>' : `<button class="ghost" data-act="slang" data-id="${esc(f.id)}">Släng</button>`}</div>`).join('')}</div>` : ''}
+    <div class="row"><button class="ghost${confirmArm==='nollspel'?' warn':''}" data-act="nollspel">${armBtn('nollspel','Börja om med alla frågor')}</button></div>
+  </section>`;
+}
+
+/* ----- Homey ----- */
+function pillHTML(){
+  const t = { ok:'Homey', wait:'Homey · väntar', err:'Homey · fel', av:'Bara den här enheten' }[HSTAT] || 'Homey';
+  const kl = { ok:'ok', wait:'wait', err:'err' }[HSTAT] || '';
+  return `<button class="ghost pill ${kl}" id="hpill" data-act="view" data-v="homey" title="${esc(HTEXT)}"><span class="dot"></span>${t}</button>`;
+}
+function homeyHTML(){
+  const c = cred();
+  const forklaring = {
+    ok:'Ansluten. Spelare, statistik, spelade och egna frågor sparas i Homey.',
+    wait:'Homey svarar inte just nu. Allt sparas här och skickas när Homey går att nå igen.',
+    err:HTEXT === 'Appen Frågekampen hittades inte i Homey' ? 'Homey svarar, men appen Frågekampen är inte installerad. Installera den med homey app install.' : (HTEXT || 'Något gick fel mot Homey.'),
+    av:'Inte ansluten. Spelet fungerar, men allt sparas bara i den här webbläsaren.'
+  }[HSTAT];
+  return `<section class="panel"><h2>Homey</h2>
+    <p class="note ${HSTAT==='ok'?'good':HSTAT==='err'?'warn':''}" role="status">${esc(forklaring)}</p>
+    ${OUT.length ? `<p class="note">${OUT.length} ändring${OUT.length===1?'':'ar'} väntar på att skickas.</p>` : ''}
+    ${c.fran === 'dashboarden' ? '<p class="note">Uppgifterna är lånade från dashboarden på samma webbplats.</p>' : ''}
+    <div class="fields">
+      <label class="field" for="h-id">Homey-ID<input id="h-id" spellcheck="false" autocomplete="off" value="${esc(c.homeyId)}" placeholder="står efter /homeys/ på my.homey.app"></label>
+      <label class="field" for="h-tok">Personal Access Token<input id="h-tok" type="password" spellcheck="false" autocomplete="off" value="${esc(c.token)}" placeholder="tre delar åtskilda med kolon"></label>
+      <label class="field" for="h-lan">Lokal adress <small>(valfritt)</small><input id="h-lan" spellcheck="false" autocomplete="off" value="${esc(c.lan)}" placeholder="http://192.168.50.147"></label>
+    </div>
+    <div class="row"><button class="cta" data-act="hspara">Anslut och synka</button>${credOk() ? `<button class="ghost${confirmArm==='hglom'?' warn':''}" data-act="hglom">${armBtn('hglom','Koppla från')}</button>` : ''}</div>
+    <p class="note">Uppgifterna sparas bara i den här webbläsaren. Token skapas i Homey Developer Tools under Personal Access Tokens.</p>
+  </section>`;
+}
+
+function toolsHTML(){
+  const b = [pillHTML()];
+  if (VIEW) { b.push(`<button class="ghost" data-act="view" data-v="">← Till spelet</button>`); return b.join(''); }
+  b.push(`<button class="ghost" data-act="view" data-v="stats">Statistik</button>`, `<button class="ghost" data-act="view" data-v="bank">Frågebanken</button>`);
+  if (S.screen === 'board') {
+    b.push(`<button class="ghost" data-act="adjust">${S.adjust ? 'Klar med poängen' : 'Justera poäng'}</button>`);
+    if (!roundDone()) b.push(`<button class="ghost${confirmArm==='skip'?' warn':''}" data-act="skip">${armBtn('skip', S.round===0?'Hoppa till omgång 2':'Hoppa till finalen')}</button>`);
+  }
+  if (S.screen !== 'setup') b.push(`<button class="ghost${confirmArm==='reset'?' warn':''}" data-act="reset">${armBtn('reset','Nytt spel')}</button>`);
+  return b.join('');
+}
+function undoHTML(){
+  if (VIEW || !UNDO.length) return '';
+  const l = UNDO[UNDO.length-1].l;
+  return `<button class="undo" data-act="undo" aria-label="Ångra: ${esc(l)}"><span class="ar">↶</span><span class="tx"><b>Ångra</b><span>${esc(l)}</span></span></button>`;
+}
+
+let lastOpenKey = null;
+function render(bevaraFalt){
+  const fokus = bevaraFalt && document.activeElement && document.activeElement.id;
+  const falt = {};
+  if (bevaraFalt) document.querySelectorAll('#main input, #main select').forEach(e => { falt[e.id] = e.value; });
+  const m = document.getElementById('main');
+  m.innerHTML = VIEW ? ({ stats:statsHTML, bank:bankHTML, homey:homeyHTML })[VIEW]()
+    : ({ setup:setupHTML, board:boardHTML, 'final-bet':finalBetHTML, 'final-q':finalQHTML, 'final-judge':finalJudgeHTML, end:endHTML })[S.screen]();
+  for (const id in falt) { const e = document.getElementById(id); if (e && e.type !== 'password') e.value = falt[id]; }
+  if (fokus) { const e = document.getElementById(fokus); if (e) e.focus(); }
+  document.getElementById('tools').innerHTML = toolsHTML();
+  document.getElementById('modal').innerHTML = (!VIEW && S.screen === 'board') ? modalHTML() : '';
+  document.getElementById('undo').innerHTML = undoHTML();
+  document.getElementById('kanda').innerHTML = kandaNamn().map(n => `<option value="${esc(n)}"></option>`).join('');
+  document.getElementById('foot').textContent = `Frågekampen ${APP_VERSION} · ${credOk() ? 'sparas i Homey' : 'sparas i den här webbläsaren'}`;
+  if (!VIEW) {
+    const openKey = S.screen === 'final-q' ? 'final' : (S.open && S.open.phase === 'q' ? `${S.round}-${S.open.c}-${S.open.r}` : null);
+    if (openKey && openKey !== lastOpenKey) timerStart(openKey === 'final' ? FSECS : QSECS);
+    else if (!openKey) timerStop();
+    lastOpenKey = openKey;
+    paintTimer();
+  }
+}
+/* Varje ändring av spelet går hit: tidsstämpel, lokalt, till Homey, resultat. */
+function commit(){
+  S.t = Date.now(); saveS();
+  enq('PUT', '/spel', { spel:S, t:S.t }, 'spel');
+  stammaResultat();
+  render();
+}
+
+function closeQ(){ S.used[S.round].push(S.open.c+'-'+S.open.r); S.open = null; }
+function arm(name){ confirmArm = name; clearTimeout(confirmTimer); confirmTimer = setTimeout(()=>{ confirmArm = null; render(true); }, 3000); }
+function markeraSpelad(id){ if (id && !D.spelade.has(id)) { D.spelade.add(id); saveD(); enq('POST', '/spelade', { ids:[id] }); } }
+
+/* ===================== Tryck ===================== */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const act = el.dataset.act, p = +el.dataset.p;
+  /* Sådant som inte ändrar spelet: ingen ångra-punkt, ingen synk. */
+  switch (act) {
+    case 'timer':
+      if (T.left <= 0) timerStart(T.dur);
+      else if (T.run) timerStop();
+      else { T.run = true; T.last = performance.now(); T.raf = requestAnimationFrame(tick); }
+      paintTimer(); return;
+    case 'view': VIEW = el.dataset.v || null; confirmArm = null; render(); window.scrollTo(0,0); if (VIEW === 'homey' || VIEW === 'stats') pull(); return;
+    case 'hspara': {
+      const c = { homeyId:document.getElementById('h-id').value.trim(), token:document.getElementById('h-tok').value.trim(), lan:document.getElementById('h-lan').value.trim() };
+      lsSet(CRED_KEY, c); lsSet('fk-vag', ''); sattStatus('wait', 'Ansluter…'); render(true); pull(); return; }
+    case 'hglom':
+      if (confirmArm !== 'hglom') { arm('hglom'); render(true); return; }
+      confirmArm = null; lsSet(CRED_KEY, { token:'', homeyId:'', lan:'', fran:'frånkopplad' }); sattStatus('av'); render(); return;
+    case 'gen': {
+      const nyckel = document.getElementById('gen-nyckel').value.trim();
+      if (nyckel) lsSet('fk-gemini', nyckel);
+      const kat = document.getElementById('gen-ny').value.trim() || document.getElementById('gen-kat').value;
+      genereraFragor(kat, +document.getElementById('gen-antal').value || 20); return; }
+    case 'slang': slangFraga(el.dataset.id); toast('Frågan är slängd'); render(true); return;
+    case 'nollspel':
+      if (confirmArm !== 'nollspel') { arm('nollspel'); render(true); return; }
+      confirmArm = null; D.spelade = new Set(); saveD(); enq('POST', '/nollstall', { vad:'spelade' }); toast('Alla frågor räknas som ospelade igen'); render(true); return;
+    case 'nollstat':
+      if (confirmArm !== 'nollstat') { arm('nollstat'); render(); return; }
+      confirmArm = null; D.resultat = []; saveD(); enq('POST', '/nollstall', { vad:'statistik' }); toast('Statistiken är nollställd'); render(); return;
+    case 'slangq':
+      if (confirmArm !== 'slangq') { arm('slangq'); render(); return; }
+      confirmArm = null; slangFraga(el.dataset.id); toast('Frågan är slängd'); render(); return;
+    case 'undo': undo(); commit(); return;
+  }
+
+  /* Allt nedan ändrar spelet och går att ångra. */
+  switch (act) {
+    case 'start': {
+      snap('Starta spelet');
+      S.names = S.names.map((n,i) => (document.getElementById('p'+i).value.trim() || DEF[i]));
+      D.spelare = S.names.slice(); saveD(); enq('PUT', '/spelare', { namn:S.names }, 'spelare');
+      S.screen = 'board'; break; }
+    case 'cell': {
+      const c = +el.dataset.c, r = +el.dataset.r;
+      snap(`Öppnade ${curRound().cats[c].t} ${val(r)}`);
+      S.open = { c, r, phase: isDbl(c,r) ? 'dbl' : 'q' };
+      S.game.recycled = false; break; }
+    case 'dblgo': snap('Visa frågan'); S.open.phase = 'q'; break;
+    case 'reveal': snap('Visa svaret'); S.open.phase = 'a'; break;
+    case 'dres': {
+      const o = S.open, pts = val(o.r) * (isDbl(o.c,o.r) ? 2 : 1), ratt = el.dataset.v === '1', vem = ans();
+      snap(ratt ? `Rätt, +${pts} till ${S.names[vem]}` : `Fel för ${S.names[vem]}`);
+      if (ratt) S.scores[vem] += pts;
+      S.rf[vem][ratt ? 0 : 1]++;
+      markeraSpelad(curRound().cats[o.c].q[o.r][2]);
+      S.turn = vem; closeQ(); break; }
+    case 'cancel': snap('Stäng frågan'); S.open = null; break;
+    case 'adjust': snap(S.adjust ? 'Klar med poängen' : 'Justera poäng'); S.adjust = !S.adjust; break;
+    case 'adj': snap(`${+el.dataset.d > 0 ? '+' : '−'}100 för ${S.names[p]}`); S.scores[p] += +el.dataset.d; break;
+    case 'next':
+      snap(S.round === 0 ? 'Till omgång 2' : 'Till finalen');
+      if (S.round === 0) { S.round = 1; } else { S.screen = 'final-bet'; S.adjust = false; }
+      break;
+    case 'skip':
+      if (confirmArm !== 'skip') { arm('skip'); render(); return; }
+      confirmArm = null;
+      snap(S.round === 0 ? 'Hoppa till omgång 2' : 'Hoppa till finalen');
+      if (S.round === 0) S.round = 1; else { S.screen = 'final-bet'; S.adjust = false; }
+      break;
+    case 'fshow':
+      snap('Visa finalfrågan');
+      S.bets = S.names.map((n,i) => {
+        const mx = Math.max(S.scores[i], 500), v = Math.round(+document.getElementById('bet'+i).value || 0);
+        return Math.min(Math.max(v, 0), mx);
+      });
+      S.fres = [null,null,null,null,null,null]; S.screen = 'final-q'; break;
+    case 'freveal': snap('Visa finalsvaret'); S.screen = 'final-judge'; markeraSpelad(S.game.final.id); break;
+    case 'fres': snap(`${S.names[p]} ${el.dataset.v === '1' ? 'rätt' : 'fel'} i finalen`); S.fres[p] = el.dataset.v === '1'; break;
+    case 'fscore':
+      snap('Räkna ihop');
+      S.scores = S.scores.map((s,i) => s + (S.fres[i] ? S.bets[i] : -S.bets[i]));
+      S.rf = S.rf.map((x,i) => [x[0] + (S.fres[i] ? 1 : 0), x[1] + (S.fres[i] ? 0 : 1)]);
+      S.screen = 'end'; break;
+    case 'again': snap('Nytt spel'); S = fresh(S.names); S.screen = 'board'; break;
+    case 'markold': snap('Markera de första frågorna'); ORIGINAL.forEach(id => D.spelade.add(id)); saveD(); enq('POST', '/spelade', { ids:ORIGINAL }); S.game = buildGame(); break;
+    case 'reset':
+      if (confirmArm !== 'reset') { arm('reset'); render(); return; }
+      confirmArm = null; snap('Nytt spel'); S = fresh(S.names); break;
+    default: return;
+  }
+  commit();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pull(); });
+window.addEventListener('online', () => { flush(); pull(); });
+
+/* ===================== Start ===================== */
+if (migrerad && S.used[0].length === 0 && S.used[1].length === 0 && (S.screen === 'setup' || S.screen === 'board')) { S.game = buildGame(); saveS(); }
+render();
+pull();
+(function swStarta(){
+  try {
+    if ((location.protocol !== 'https:' && location.hostname !== 'localhost') || !('serviceWorker' in navigator) || window.self !== window.top) return;
+    navigator.serviceWorker.register('sw.js', { scope:'./', updateViaCache:'none' }).then(r => { try { r.update(); } catch(e) {} }).catch(() => {});
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
