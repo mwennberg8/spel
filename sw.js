@@ -1,7 +1,7 @@
 /* Frågekampens service worker. Nätet först, så en ny version syns direkt;
    cachen tar över när nätet saknas, så spelet går att köra offline.
    Bara egna filer: anrop till Homey, Gemini och typsnitten går orörda förbi. */
-const CACHE = 'fragekampen-2.1.3';
+const CACHE = 'fragekampen-2.1.4';
 const FILER = ['./', 'index.html', 'fragekampen.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILER)).then(() => self.skipWaiting()));
