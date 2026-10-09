@@ -60,7 +60,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,1vw,10px)}
 .cat{min-height:3.6em;display:flex;align-items:center;justify-content:center;text-align:center;
   padding:6px 4px;border-bottom:3px solid var(--brass);font-weight:800;text-transform:uppercase;
-  letter-spacing:.05em;font-size:clamp(9px,1.5vw,15px);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+  letter-spacing:.05em;font-size:clamp(9px,1.5vw,15px);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+@media (max-width:560px){.cat{letter-spacing:0;padding-inline:1px}}
+.cat.bytbar{background:transparent;color:var(--ink);border:0;border-bottom:3px solid var(--brass);border-radius:0;font-family:var(--f-body);cursor:pointer;flex-direction:column;gap:2px}
+.cat.bytbar:hover{color:var(--brass)}
+.cat .byt{font-size:12px;line-height:1;color:var(--brass);letter-spacing:0}
+.katval{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.katval .pbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left}
+.katval .pbtn small{font-weight:600;opacity:.75;font-size:12px}
 .cell{aspect-ratio:4/3;max-width:100%;background:var(--card);color:var(--card-ink);font-family:var(--f-display);
   font-size:clamp(13px,3.4vw,36px);font-variant-numeric:tabular-nums;box-shadow:0 3px 0 var(--card-edge);
   transition:transform .12s ease, box-shadow .12s ease;display:flex;align-items:center;justify-content:center;padding:0}
@@ -499,7 +506,7 @@ const FINALS = [
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 const APP_ID = 'com.mawe.fragekampen';
 const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
@@ -944,6 +951,7 @@ function timerHTML(){
 }
 
 /* ===================== Rendering ===================== */
+let BYTKAT = null;        /* kolumn vars kategori håller på att bytas */
 let VIEW = null;          /* null = spelet, annars 'stats', 'bank' eller 'homey' */
 let confirmArm = null, confirmTimer = 0, toastTimer = 0;
 function toast(t){
@@ -985,6 +993,7 @@ function setupHTML(){
       <li>Den som svarar väljer kategori och poäng. Den som frågar håller i skärmen, läser upp frågan och visar svaret.</li>
       <li>Rätt svar ger poängen, fel svar ger noll. Sedan går frågandet ett steg vidare: den som nyss svarade frågar nästa person.</li>
       <li>Två rutor per omgång är <b>Dubbel</b> och ger dubbla poäng.</li>
+      <li>Vill ni inte ha en kategori? Tryck på dess rubrik och välj en annan. Använda rutor påverkas inte.</li>
       <li>Omgång 2 ger dubbla värden. I <b>finalen</b> svarar alla och satsar poäng innan frågan visas. Fel svar kostar insatsen.</li>
       <li>Tryckte någon fel? <b>Ångra</b> uppe bland knapparna tar tillbaka senaste trycket.</li>
     </ul>
@@ -1000,7 +1009,12 @@ function boardHTML(){
   let h = `<div class="status"><span class="round">${R.name}</span>
     <span class="turn">${esc(S.names[S.turn])} frågar → <b>${esc(S.names[ans()])}</b> svarar och väljer ruta</span></div>
     <section class="board" aria-label="Spelplan">`;
-  R.cats.forEach(c => h += `<div class="cat">${esc(c.t)}</div>`);
+  R.cats.forEach((c, ci) => {
+    const kvar = [0,1,2,3,4].some(r => !isUsed(ci, r));
+    h += kvar
+      ? `<button class="cat bytbar" data-act="bytkat" data-c="${ci}" title="Byt kategori" aria-label="Byt ut kategorin ${esc(c.t)}">${esc(c.t)}<span class="byt" aria-hidden="true">⇄</span></button>`
+      : `<div class="cat">${esc(c.t)}</div>`;
+  });
   for (let r=0; r<5; r++) for (let c=0; c<6; c++) {
     const u = isUsed(c,r);
     h += `<button class="cell${u?' used':''}" id="cell-${c}-${r}" ${u?'disabled aria-label="Använd"':`data-act="cell" data-c="${c}" data-r="${r}" aria-label="${esc(R.cats[c].t)} för ${val(r)}"`}>${u?'':val(r)}</button>`;
@@ -1051,6 +1065,34 @@ function endHTML(){
     <div class="row"><button class="cta" data-act="again">Spela igen med samma spelare</button><button class="ghost" data-act="nyaspelare">Ändra spelare</button><button class="ghost" data-act="view" data-v="stats">Se statistiken</button></div></section>`;
 }
 
+/* Kategoriväljaren. Visar kategorier som inte redan finns i spelet och har
+   minst fem frågor, flest ospelade först. */
+function bytkatHTML(){
+  const c = BYTKAT, gammal = curRound().cats[c];
+  const iSpelet = new Set(S.game.rounds.flat().map(k => norm(k.t)));
+  const val = kategorier().filter(k => k.fr.length >= 5 && !iSpelet.has(norm(k.t)))
+    .sort((a,b) => ospelade(b) - ospelade(a) || a.t.localeCompare(b.t, 'sv'));
+  const kvar = [0,1,2,3,4].filter(r => !isUsed(c, r)).length;
+  return `<div class="overlay" role="dialog" aria-modal="true" aria-label="Byt kategori"><div class="qcard">
+    <div class="qmeta"><span>Byt kategori</span><span>${kvar} ${kvar === 1 ? 'ruta' : 'rutor'} kvar</span></div>
+    <p class="qtext" style="font-size:clamp(20px,3.4vw,30px)">Byt ut ${esc(gammal.t)} mot …</p>
+    ${val.length ? `<div class="katval">${val.map(k => `<button class="pbtn" data-act="valkat" data-k="${esc(k.t)}">${esc(k.t)}<small>${ospelade(k)} ospelade</small></button>`).join('')}</div>`
+      : '<p class="who">Det finns inga fler kategorier att byta till. Skapa fler i Frågebanken.</p>'}
+    <div class="row">${val.length ? '<button class="pbtn alt" data-act="valkat" data-k="">Slumpa en</button>' : ''}<button class="plain" data-act="bytavbryt">Avbryt</button></div>
+  </div></div>`;
+}
+function bytKategori(c, namn){
+  const R = S.game.rounds[S.round], gammal = R[c];
+  const k = kategorier().find(x => norm(x.t) === norm(namn));
+  if (!k) return false;
+  const tagna = idnISpelet();
+  R[c] = { t:k.t, q:gammal.q.map((x, r) => {
+    if (isUsed(c, r)) return x;
+    const f = valjFraga(k.fr, r + 1, tagna); tagna.add(f.id);
+    return [f.q, f.a, f.id];
+  }) };
+  return true;
+}
 function modalHTML(){
   const o = S.open; if (!o) return '';
   const R = curRound(), cat = R.cats[o.c], [q,a,id,egenKat] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
@@ -1188,7 +1230,8 @@ function render(bevaraFalt){
   for (const id in falt) { const e = document.getElementById(id); if (e && e.type !== 'password') e.value = falt[id]; }
   if (fokus) { const e = document.getElementById(fokus); if (e) e.focus(); }
   document.getElementById('tools').innerHTML = toolsHTML();
-  document.getElementById('modal').innerHTML = (!VIEW && S.screen === 'board') ? modalHTML() : '';
+  if (BYTKAT != null && (VIEW || S.screen !== 'board' || S.open)) BYTKAT = null;
+  document.getElementById('modal').innerHTML = (!VIEW && S.screen === 'board') ? (BYTKAT != null ? bytkatHTML() : modalHTML()) : '';
   document.getElementById('kanda').innerHTML = kandaNamn().map(n => `<option value="${esc(n)}"></option>`).join('');
   document.getElementById('foot').innerHTML = `Frågekampen ${APP_VERSION} · ${fotSpar()} · ${arApp() ? 'körs som app' : 'körs i webbläsaren'}`
     + (installEvent && !arApp() ? ` <button class="ghost" data-act="installera" style="margin-left:8px">Installera som app</button>` : '');
@@ -1273,6 +1316,8 @@ document.addEventListener('click', e => {
       if (confirmArm !== 'slangq') { arm('slangq'); render(); return; }
       confirmArm = null; slangFraga(el.dataset.id); toast('Frågan är slängd'); render(); return;
     case 'undo': undo(); commit(); return;
+    case 'bytkat': BYTKAT = +el.dataset.c; render(); return;
+    case 'bytavbryt': BYTKAT = null; render(); return;
     case 'installera': if (installEvent) { installEvent.prompt(); installEvent.userChoice.finally(() => { installEvent = null; render(true); }); } return;
     case 'pupp': case 'pned': case 'pbort': case 'pny': case 'pblanda': {
       if (S.screen !== 'setup') return;
@@ -1313,6 +1358,20 @@ document.addEventListener('click', e => {
       markeraSpelad(curRound().cats[o.c].q[o.r][2]);
       S.turn = vem; closeQ(); break; }
     case 'cancel': snap('Stäng frågan'); S.open = null; break;
+    case 'valkat': {
+      const c = BYTKAT; if (c == null) return;
+      let namn = el.dataset.k;
+      if (!namn) {
+        const iSpelet = new Set(S.game.rounds.flat().map(k => norm(k.t)));
+        const val = kategorier().filter(k => k.fr.length >= 5 && !iSpelet.has(norm(k.t)) && ospelade(k) >= 5);
+        const k = shuffle(val.length ? val : kategorier().filter(k => k.fr.length >= 5 && !iSpelet.has(norm(k.t))))[0];
+        if (!k) return; namn = k.t;
+      }
+      const fran = curRound().cats[c].t;
+      snap(`Bytte ${fran} mot ${namn}`);
+      BYTKAT = null;
+      if (!bytKategori(c, namn)) { UNDO.pop(); lsSet('fk-angra', UNDO); return; }
+      toast(`${fran} är utbytt mot ${namn}`); break; }
     case 'nyfraga': {
       const o = S.open, kat = curRound().cats[o.c], gammal = kat.q[o.r];
       const f = ersattning(kat.t, o.r + 1, idnISpelet());
