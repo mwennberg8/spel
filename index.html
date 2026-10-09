@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Frågekampen</title>
-<meta name="description" content="Frågespel för sex spelare runt bordet">
+<meta name="description" content="Frågespel för 2–8 spelare runt bordet">
 <meta name="theme-color" content="#0f2a26">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -92,6 +92,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .panel h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:800}
 .panel p{margin:0}
 .names{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.order{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:560px}
+.orow{display:grid;grid-template-columns:2em minmax(0,1fr) repeat(3,40px);gap:6px;align-items:center}
+.onr{font-family:var(--f-display);color:var(--brass);font-size:20px;text-align:center}
+.orow input{font:inherit;font-size:17px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--felt);color:var(--ink);width:100%;min-width:0}
+.obtn{height:44px;background:var(--felt);color:var(--ink);border:1px solid var(--line);font-size:18px;font-weight:800;padding:0}
+.obtn:hover:not(:disabled){border-color:var(--muted)}
 .names label,.field{display:flex;flex-direction:column;gap:4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;min-width:0}
 .names input,.bets input,.field input,.field select{font:inherit;font-size:17px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--felt);color:var(--ink);text-transform:none;letter-spacing:0;width:100%}
 .field small{font-size:13px;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
@@ -179,7 +185,7 @@ td.first{color:var(--brass);font-weight:800}
 <body>
 <div class="wrap">
   <header class="top">
-    <h1 class="brand">Frågekampen<small>Sex stolar · två omgångar · en final</small></h1>
+    <h1 class="brand">Frågekampen<small>Två omgångar · en final</small></h1>
     <div class="tools" id="tools"></div>
   </header>
   <main id="main"></main>
@@ -402,10 +408,14 @@ const FINALS = [
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.1.1';
 const APP_ID = 'com.mawe.fragekampen';
 const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
+const MIN_SPELARE = 2, MAX_SPELARE = 8;
+/* "Spelare 3" är bara en platshållare, inget riktigt namn. */
+const ararNamn = n => !n || /^Spelare \d+$/.test(n);
+const nollor = (n, v) => Array.from({ length:n }, () => (typeof v === 'function' ? v() : v));
 const QSECS = 30, FSECS = 60;
 const GEMINI_MODELLER = ['gemini-flash-latest','gemini-flash-lite-latest','gemini-3.5-flash-lite','gemini-3.1-flash-lite'];
 
@@ -518,9 +528,10 @@ function pickDoubles(){
   return [c1+'-'+(1+Math.floor(Math.random()*4)), c2+'-'+(1+Math.floor(Math.random()*4))];
 }
 function fresh(names){
-  return { v:3, id:uid(), t:0, game:buildGame(), screen:'setup', names:(names || (D.spelare.length === 6 ? D.spelare : DEF)).slice(), scores:[0,0,0,0,0,0],
-    rf:[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]], turn:0, round:0, used:[[],[]], dbl:[pickDoubles(),pickDoubles()], open:null,
-    bets:[0,0,0,0,0,0], fres:[null,null,null,null,null,null], adjust:false };
+  const nm = (names || (D.spelare.length >= MIN_SPELARE ? D.spelare : DEF)).slice(0, MAX_SPELARE), n = nm.length;
+  return { v:3, id:uid(), t:0, game:buildGame(), screen:'setup', names:nm, scores:nollor(n, 0),
+    rf:nollor(n, () => [0,0]), turn:0, round:0, used:[[],[]], dbl:[pickDoubles(),pickDoubles()], open:null,
+    bets:nollor(n, 0), fres:nollor(n, null), adjust:false };
 }
 function migreraSpel(g){
   /* Ett pågående spel från version 1.2–1.3 får nya id och de fält som saknas. */
@@ -537,7 +548,7 @@ const val = r => STEPS[S.round] * (r+1);
 const curRound = () => ({ name:RNAMES[S.round], step:STEPS[S.round], cats:S.game.rounds[S.round] });
 const isDbl = (c,r) => S.dbl[S.round].includes(c+'-'+r);
 const isUsed = (c,r) => S.used[S.round].includes(c+'-'+r);
-const ans = () => (S.turn + 1) % 6;
+const ans = () => (S.turn + 1) % S.names.length;
 const roundDone = () => S.used[S.round].length >= 30;
 
 /* ===================== Ångra ===================== */
@@ -657,7 +668,7 @@ async function pull(){
   saveD();
   /* Ett spel som fortsatt på en annan enhet tas över. */
   if (d.spel && d.spel.v === 3 && (d.spelT || 0) > (S.t || 0)) { S = d.spel; saveS(); UNDO = []; lsSet('fk-angra', UNDO); toast('Spelet hämtades från Homey'); }
-  else if (S.screen === 'setup' && D.spelare.length === 6 && S.names.every((n,i) => n === DEF[i])) { S.names = D.spelare.slice(); saveS(); }
+  else if (S.screen === 'setup' && D.spelare.length >= MIN_SPELARE && S.names.every(ararNamn)) { S.names = D.spelare.slice(0, MAX_SPELARE); saveS(); }
   sattStatus('ok');
   render(true);
   flush();
@@ -694,7 +705,7 @@ function statistik(){
   }
   return [...m.values()].sort((a,b) => b.vinster - a.vinster || (b.summa/b.spel) - (a.summa/a.spel));
 }
-function kandaNamn(){ const s = new Set(D.spelare); D.resultat.forEach(r => r.rader.forEach(x => s.add(x.namn))); return [...s].filter(n => n && !DEF.includes(n)); }
+function kandaNamn(){ const s = new Set(D.spelare); D.resultat.forEach(r => r.rader.forEach(x => s.add(x.namn))); return [...s].filter(n => !ararNamn(n)); }
 
 /* ===================== Släng fråga ===================== */
 function slangFraga(id){
@@ -845,7 +856,19 @@ function setupHTML(){
   const egna = D.egna.filter(f => !D.slangda.has(f.id)).length;
   return `<section class="panel">
     <h2>Vilka sitter vid bordet?</h2>
-    <div class="names">${S.names.map((n,i)=>`<label for="p${i}">Stol ${i+1}<input id="p${i}" value="${esc(n)}" maxlength="18" autocomplete="off" list="kanda"></label>`).join('')}</div>
+    <p class="note">Skriv in spelarna i den ordning ni sitter. Den som står efter dig svarar på dina frågor.</p>
+    <ol class="order">${S.names.map((n,i)=>`<li class="orow">
+      <label class="onr" for="p${i}">${i+1}</label>
+      <input id="p${i}" value="${ararNamn(n) ? '' : esc(n)}" placeholder="Spelare ${i+1}" maxlength="18" autocomplete="off" list="kanda">
+      <button class="obtn" data-act="pupp" data-p="${i}" ${i===0?'disabled':''} aria-label="Flytta upp ${esc(n)}">↑</button>
+      <button class="obtn" data-act="pned" data-p="${i}" ${i===S.names.length-1?'disabled':''} aria-label="Flytta ned ${esc(n)}">↓</button>
+      <button class="obtn" data-act="pbort" data-p="${i}" ${S.names.length<=MIN_SPELARE?'disabled':''} aria-label="Ta bort ${esc(n)}">✕</button>
+    </li>`).join('')}</ol>
+    <div class="row">
+      <button class="ghost" data-act="pny" ${S.names.length>=MAX_SPELARE?'disabled':''}>+ Lägg till spelare</button>
+      <button class="ghost" data-act="pblanda">Blanda ordningen</button>
+      <span class="note">${S.names.length} spelare${30 % S.names.length ? ' · frågorna går inte jämnt ut, så några svarar på en fråga mer per omgång' : ''}</span>
+    </div>
     <ul class="rules">
       <li>Sätt er i stolsordning runt bordet. <b>En frågar, och den som sitter efter svarar.</b></li>
       <li>Den som svarar väljer kategori och poäng. Den som frågar håller i skärmen, läser upp frågan och visar svaret.</li>
@@ -914,7 +937,7 @@ function endHTML(){
       if (i===0 || p.s !== order[i-1].s) pos = i+1;
       return `<div class="place${pos===1?' p1':''}"><span class="pos">${pos}:a</span><span class="pn">${esc(p.n)} <small style="font-weight:600;opacity:.7">· ${p.r[0]} rätt</small></span><span class="ps">${p.s}</span></div>`;
     }).join('')}</div>
-    <div class="row"><button class="cta" data-act="again">Spela igen med samma namn</button><button class="ghost" data-act="view" data-v="stats">Se statistiken</button></div></section>`;
+    <div class="row"><button class="cta" data-act="again">Spela igen med samma spelare</button><button class="ghost" data-act="nyaspelare">Ändra spelare</button><button class="ghost" data-act="view" data-v="stats">Se statistiken</button></div></section>`;
 }
 
 function modalHTML(){
@@ -1056,7 +1079,8 @@ function render(bevaraFalt){
   document.getElementById('modal').innerHTML = (!VIEW && S.screen === 'board') ? modalHTML() : '';
   document.getElementById('undo').innerHTML = undoHTML();
   document.getElementById('kanda').innerHTML = kandaNamn().map(n => `<option value="${esc(n)}"></option>`).join('');
-  document.getElementById('foot').textContent = `Frågekampen ${APP_VERSION} · ${credOk() ? 'sparas i Homey' : 'sparas i den här webbläsaren'}`;
+  document.getElementById('foot').innerHTML = `Frågekampen ${APP_VERSION} · ${credOk() ? 'sparas i Homey' : 'sparas i den här webbläsaren'} · ${arApp() ? 'körs som app' : 'körs i webbläsaren'}`
+    + (installEvent && !arApp() ? ` <button class="ghost" data-act="installera" style="margin-left:8px">Installera som app</button>` : '');
   if (!VIEW) {
     const openKey = S.screen === 'final-q' ? 'final' : (S.open && S.open.phase === 'q' ? `${S.round}-${S.open.c}-${S.open.r}` : null);
     if (openKey && openKey !== lastOpenKey) timerStart(openKey === 'final' ? FSECS : QSECS);
@@ -1073,6 +1097,18 @@ function commit(){
   render();
 }
 
+/* Läser in det som står i namnrutorna, så inget skrivet försvinner när ordningen ändras. */
+function lasNamn(){ S.names = S.names.map((n,i) => { const e = document.getElementById('p'+i); return e ? e.value.trim() : n; }); }
+/* Installation. Chrome skickar beforeinstallprompt bara när sidan uppfyller
+   kraven för en riktig app. Knappen syns alltså bara när en installation
+   faktiskt blir en app utan adressfält, inte en genväg. */
+let installEvent = null;
+function arApp(){
+  try { return !!(navigator.standalone || ['standalone','fullscreen','minimal-ui'].some(m => window.matchMedia && window.matchMedia('(display-mode: ' + m + ')').matches)); }
+  catch(e) { return false; }
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvent = e; render(true); });
+window.addEventListener('appinstalled', () => { installEvent = null; toast('Frågekampen är installerad som app'); render(true); });
 function closeQ(){ S.used[S.round].push(S.open.c+'-'+S.open.r); S.open = null; }
 function arm(name){ confirmArm = name; clearTimeout(confirmTimer); confirmTimer = setTimeout(()=>{ confirmArm = null; render(true); }, 3000); }
 function markeraSpelad(id){ if (id && !D.spelade.has(id)) { D.spelade.add(id); saveD(); enq('POST', '/spelade', { ids:[id] }); } }
@@ -1111,13 +1147,29 @@ document.addEventListener('click', e => {
       if (confirmArm !== 'slangq') { arm('slangq'); render(); return; }
       confirmArm = null; slangFraga(el.dataset.id); toast('Frågan är slängd'); render(); return;
     case 'undo': undo(); commit(); return;
+    case 'installera': if (installEvent) { installEvent.prompt(); installEvent.userChoice.finally(() => { installEvent = null; render(true); }); } return;
+    case 'pupp': case 'pned': case 'pbort': case 'pny': case 'pblanda': {
+      if (S.screen !== 'setup') return;
+      lasNamn();
+      const nm = S.names;
+      if (act === 'pupp' && p > 0) [nm[p-1], nm[p]] = [nm[p], nm[p-1]];
+      if (act === 'pned' && p < nm.length-1) [nm[p+1], nm[p]] = [nm[p], nm[p+1]];
+      if (act === 'pbort' && nm.length > MIN_SPELARE) nm.splice(p, 1);
+      if (act === 'pny' && nm.length < MAX_SPELARE) nm.push('');
+      if (act === 'pblanda') shuffle(nm);
+      const fokus = act === 'pny' ? 'p' + (nm.length-1) : (act === 'pupp' || act === 'pned') ? 'p' + (act === 'pupp' ? p-1 : p+1) : null;
+      saveS(); render();
+      if (fokus) { const f = document.getElementById(fokus); if (f) f.focus(); }
+      return; }
   }
 
   /* Allt nedan ändrar spelet och går att ångra. */
   switch (act) {
     case 'start': {
       snap('Starta spelet');
-      S.names = S.names.map((n,i) => (document.getElementById('p'+i).value.trim() || DEF[i]));
+      lasNamn();
+      S.names = S.names.map((n,i) => (ararNamn(n) ? 'Spelare ' + (i+1) : n));
+      { const n = S.names.length; S.scores = nollor(n, 0); S.rf = nollor(n, () => [0,0]); S.bets = nollor(n, 0); S.fres = nollor(n, null); S.turn = 0; }
       D.spelare = S.names.slice(); saveD(); enq('PUT', '/spelare', { namn:S.names }, 'spelare');
       S.screen = 'board'; break; }
     case 'cell': {
@@ -1153,7 +1205,7 @@ document.addEventListener('click', e => {
         const mx = Math.max(S.scores[i], 500), v = Math.round(+document.getElementById('bet'+i).value || 0);
         return Math.min(Math.max(v, 0), mx);
       });
-      S.fres = [null,null,null,null,null,null]; S.screen = 'final-q'; break;
+      S.fres = nollor(S.names.length, null); S.screen = 'final-q'; break;
     case 'freveal': snap('Visa finalsvaret'); S.screen = 'final-judge'; markeraSpelad(S.game.final.id); break;
     case 'fres': snap(`${S.names[p]} ${el.dataset.v === '1' ? 'rätt' : 'fel'} i finalen`); S.fres[p] = el.dataset.v === '1'; break;
     case 'fscore':
@@ -1162,6 +1214,7 @@ document.addEventListener('click', e => {
       S.rf = S.rf.map((x,i) => [x[0] + (S.fres[i] ? 1 : 0), x[1] + (S.fres[i] ? 0 : 1)]);
       S.screen = 'end'; break;
     case 'again': snap('Nytt spel'); S = fresh(S.names); S.screen = 'board'; break;
+    case 'nyaspelare': snap('Ändra spelare'); S = fresh(S.names); break;
     case 'markold': snap('Markera de första frågorna'); ORIGINAL.forEach(id => D.spelade.add(id)); saveD(); enq('POST', '/spelade', { ids:ORIGINAL }); S.game = buildGame(); break;
     case 'reset':
       if (confirmArm !== 'reset') { arm('reset'); render(); return; }

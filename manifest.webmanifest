@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Frågekampen",
   "short_name": "Frågekampen",
-  "description": "Frågespel för sex spelare runt bordet",
+  "description": "Frågespel för 2–8 spelare runt bordet",
   "lang": "sv",
   "start_url": "./",
   "scope": "./",
