@@ -195,7 +195,7 @@ main{display:flex;flex-direction:column;gap:20px;min-width:0}
 <div id="toast"></div>
 <datalist id="kanda"></datalist>
 <script>
-/* Frågebank: 18 kategorier × 10 frågor, två per svårighetsnivå (1–5).
+/* Frågebank: 26 kategorier × 10 frågor (13 klassiska, 13 moderna), två per svårighetsnivå (1–5).
    Varje spel drar 12 kategorier och en fråga per nivå. Spelade frågor sparas så att nästa spel får nya. */
 const BANK = [
   { t:'Sverige runt', q:[
@@ -395,7 +395,96 @@ const BANK = [
     [4,'Vad står förkortningen USB för?','Universal Serial Bus'],
     [4,'Vilket matematiskt ord – en etta följd av 100 nollor – gav Google dess namn?','Googol'],
     [5,'Vem räknas som världens första programmerare, på 1840-talet?','Ada Lovelace'],
-    [5,'Vilket år skickades det första sms:et?','1992'] ]}
+    [5,'Vilket år skickades det första sms:et?','1992'] ]},
+  /* ===== Moderna kategorier (2.2.0) ===== */
+  { t:'Appar & internet', q:[
+    [1,'Vilken app har ett vitt spöke på gul bakgrund som logga?','Snapchat'],
+    [1,'Vilken videotjänst köptes av Google 2006?','YouTube'],
+    [2,'Vad heter tjänsten som svenska banker startade 2012 för att skicka pengar med mobilnumret?','Swish'],
+    [2,'Vilken meddelandeapp med grön logga ägs av Meta?','WhatsApp'],
+    [3,'Vilket år lanserades Instagram?','2010'],
+    [3,'Vad heter den svenska e-legitimationen som används för att logga in på banker och myndigheter?','BankID'],
+    [4,'Vilket nytt namn fick Twitter 2023?','X'],
+    [4,'Vilket svenskt spelföretag skapade Candy Crush Saga?','King'],
+    [5,'Vilket år startade Wikipedia?','2001'],
+    [5,'Vad står "QR" för i QR-kod?','Quick Response'] ]},
+  { t:'Streaming & serier', q:[
+    [1,'Vilken streamingtjänst har ett rött N som logga?','Netflix'],
+    [1,'Vad heter TV4:s tävling där kändisar dansar i par?',"Let's Dance"],
+    [2,'Vilken Netflix-serie utspelar sig i staden Hawkins och har monstret Demogorgon?','Stranger Things'],
+    [2,'Vilken serie handlar om kampen om Järntronen i Westeros?','Game of Thrones'],
+    [3,'Vilken svensk Netflix-serie från 2021 utspelar sig på en internatskola och handlar om prins Wilhelm?','Young Royals'],
+    [3,'Vilken sydkoreansk Netflix-serie från 2021 handlar om dödliga barnlekar?','Squid Game'],
+    [4,'Vad heter Netflix-serien om den brittiska kungafamiljen som började sändas 2016?','The Crown'],
+    [4,'Vilken svensk-dansk kriminalserie utspelar sig kring Öresundsbron?','Bron'],
+    [5,'Vilken skådespelare spelar Walter White i Breaking Bad?','Bryan Cranston'],
+    [5,'I vilken amerikansk stad utspelar sig HBO-serien The Wire?','Baltimore'] ]},
+  { t:'2000-talet', q:[
+    [1,'Vilken valuta började användas som sedlar och mynt i bland annat Tyskland och Frankrike 2002?','Euro'],
+    [1,'Vad heter den gröna ogern som fick sin första film 2001?','Shrek'],
+    [2,'Vad heter den första Harry Potter-filmen, från 2001?','Harry Potter och de vises sten'],
+    [2,'Vilken svensk fotbollsspelare gjorde mål med klacken mot Italien i EM 2004?','Zlatan Ibrahimović'],
+    [3,'Vem vann den första säsongen av Idol i Sverige 2004?','Daniel Lindström'],
+    [3,'Vem vann Melodifestivalen 2006 med "Invincible"?','Carola'],
+    [4,'Vilken svensk film från 2004 om en dirigent som flyttar hem till sin barndomsby blev Oscarsnominerad?','Så som i himmelen'],
+    [4,'Vilket år invigdes Öresundsbron?','2000'],
+    [5,'Vilket år gick Sverige med i Schengensamarbetet i praktiken, med passfrihet?','2001'],
+    [5,'Vilket band vann Melodifestivalen 2007 med "The Worrying Kind"?','The Ark'] ]},
+  { t:'2010-talet', q:[
+    [1,'Vem vann Eurovision för Sverige 2015 med "Heroes"?','Måns Zelmerlöw'],
+    [1,'Vilket mobilspel fick folk att jaga figurer ute på gatorna sommaren 2016?','Pokémon Go'],
+    [2,'Vad hette den svenska DJ:n bakom "Wake Me Up" och "Levels"?','Avicii'],
+    [2,'Vilken utmaning gick ut på att hälla en hink iskallt vatten över sig 2014?','Ice Bucket Challenge'],
+    [3,'Vilket land vann fotbolls-VM 2018?','Frankrike'],
+    [3,'Vilken svensk tonåring började skolstrejka för klimatet 2018?','Greta Thunberg'],
+    [4,'Vilket år gifte sig kronprinsessan Victoria och Daniel Westling?','2010'],
+    [4,'Vilken låt av Psy blev 2012 den första videon på YouTube med en miljard visningar?','Gangnam Style'],
+    [5,'Vilket år röstade Storbritannien för att lämna EU?','2016'],
+    [5,'Vem var förbundskapten för Sveriges herrlandslag i fotboll vid VM 2018?','Janne Andersson'] ]},
+  { t:'Spel & gaming', q:[
+    [1,'Vad heter Nintendos rörmokare med röd keps?','Mario'],
+    [1,'Vilket mobilspel går ut på att skjuta iväg arga fåglar mot grisar?','Angry Birds'],
+    [2,'Vilket spel börjar med att 100 spelare hoppar ut från en flygande buss?','Fortnite'],
+    [2,'Vilken Nintendo-konsol från 2017 går att spela både som handkonsol och på tv:n?','Nintendo Switch'],
+    [3,'Från vilket land kommer företaget som gjorde Angry Birds?','Finland'],
+    [3,'Vad heter svenske youtubern PewDiePie i förnamn?','Felix'],
+    [4,'Vilket Stockholmsföretag ligger bakom spelserien Battlefield?','DICE'],
+    [4,'Vad heter huvudpersonen i spelserien The Legend of Zelda?','Link'],
+    [5,'Vilket år kom den första Playstation-konsolen till Europa?','1995'],
+    [5,'Vad hette Segas sista spelkonsol, som slutade tillverkas 2001?','Dreamcast'] ]},
+  { t:'Mat & trender', q:[
+    [1,'Vilket sädesslag görs Oatlys drycker på?','Havre'],
+    [1,'Vad heter den japanska rätten med ris och rå fisk?','Sushi'],
+    [2,'Vad kallas den hawaiianska rätten med marinerad rå fisk i skål som blev populär på 2010-talet?','Poké bowl'],
+    [2,'Vad kallas kaffe som bryggs med kallt vatten i många timmar?','Cold brew'],
+    [3,'Vad heter den taiwanesiska drycken med tuggiga tapiokapärlor?','Bubble tea'],
+    [3,'Vad heter den koreanska rätten med fermenterad kål?','Kimchi'],
+    [4,'Vilken restaurang i Köpenhamn har flera gånger utsetts till världens bästa?','Noma'],
+    [4,'Vad kallas den syrliga, fermenterade tedrycken som blev trendig på 2010-talet?','Kombucha'],
+    [5,'Vad kallas den femte grundsmaken, efter sött, salt, surt och beskt?','Umami'],
+    [5,'Från vilket land kommer den fermenterade sojabönskakan tempeh?','Indonesien'] ]},
+  { t:'Musik idag', q:[
+    [1,'Vilken artist sjöng "Shake It Off" och gjorde världsturnén The Eras Tour?','Taylor Swift'],
+    [1,'Vem slog igenom med "Bad Guy" 2019?','Billie Eilish'],
+    [2,'Vilken brittisk sångare döper sina album efter matematiska tecken, som "÷" och "="?','Ed Sheeran'],
+    [2,'Vilken svensk artist sjöng "Dancing On My Own" 2010?','Robyn'],
+    [3,'Vilken sydkoreansk pojkgrupp fick en världshit med "Dynamite" 2020?','BTS'],
+    [3,'Vilken brittisk sångerskas album "21" från 2011 blev ett av decenniets mest sålda?','Adele'],
+    [4,'Vad heter den svenska duon bakom hiten "I Love It" från 2012?','Icona Pop'],
+    [4,'Vilken låt av Lil Nas X låg rekordlänge etta på amerikanska Billboardlistan 2019?','Old Town Road'],
+    [5,'Vilken svensk artist fick en internationell hit 2014 med "Habits (Stay High)"?','Tove Lo'],
+    [5,'Vilka norska tvillingar representerade Sverige i Eurovision 2024?','Marcus & Martinus'] ]},
+  { t:'Vardagsteknik', q:[
+    [1,'Vad heter Apples röstassistent?','Siri'],
+    [1,'Vad heter Amazons röstassistent?','Alexa'],
+    [2,'Vilket företag tillverkar Galaxy-telefonerna?','Samsung'],
+    [2,'Vad kallas det när man loggar in med både lösenord och en extra kod, till exempel i mobilen?','Tvåfaktorsautentisering'],
+    [3,'Vad står "GB" för när man pratar om lagring i mobilen?','Gigabyte'],
+    [3,'Vilket företag gör Pixel-telefonerna?','Google'],
+    [4,'Vad heter standarden för trådlös laddning av mobiler, uppkallad efter ett kinesiskt ord för energi?','Qi'],
+    [4,'Vad heter Apples lilla spårningsbricka som lanserades 2021?','AirTag'],
+    [5,'Vad står förkortningen LED för?','Light-Emitting Diode'],
+    [5,'Vilket år lanserades den första iPaden?','2010'] ]}
 ];
 const FINALS = [
   { cat:'Rymden', q:'Vem blev år 2006 den förste svensken i rymden?', a:'Christer Fuglesang' },
@@ -403,11 +492,14 @@ const FINALS = [
   { cat:'Världen', q:'Vilken är Europas längsta flod?', a:'Volga' },
   { cat:'Historia', q:'Vilket år röstade kvinnor för första gången i ett svenskt riksdagsval?', a:'1921' },
   { cat:'Kroppen', q:'Hur många ben har en vuxen människa?', a:'206' },
-  { cat:'Konst', q:'Vilken svensk konstnär målade monumentalmålningen "Midvinterblot"?', a:'Carl Larsson' }
+  { cat:'Konst', q:'Vilken svensk konstnär målade monumentalmålningen "Midvinterblot"?', a:'Carl Larsson' },
+  { cat:'Appar & internet', q:'Vilket år lanserades Spotify i Sverige?', a:'2008' },
+  { cat:'Streaming & serier', q:'Vilket år började Netflix sända i Sverige?', a:'2012' },
+  { cat:'Litteratur', q:'Vilket år gavs den första Harry Potter-boken ut?', a:'1997' }
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.1.5';
+const APP_VERSION = '2.2.0';
 const APP_ID = 'com.mawe.fragekampen';
 const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
@@ -493,6 +585,10 @@ function valjFraga(fr, niva, tagna){
   }
   return null;
 }
+const KLASSISKA = new Set(['Sverige runt','Mat & dryck','Sport','Natur & vetenskap','Världen','Historia','Ord & språk',
+  'Svenskt påhitt','Blandat','Djur','Rymden','Litteratur','Kroppen'].map(norm));
+const MAX_KLASSISKA = 5;
+const arKlassisk = k => KLASSISKA.has(norm(k.t));
 function buildGame(){
   let recycled = false;
   if (ospeladeTotalt() < 60) {
@@ -503,8 +599,15 @@ function buildGame(){
   /* Flest ospelade först, slumpad ordning bland lika. Att välja helt slumpat
      bland alla med minst fem ospelade lämnade ojämna rester, så tredje spelet
      fick upprepningar trots att 60 frågor fanns kvar. */
+  /* Högst 5 klassiska kategorier per spel, resten moderna (inbyggda moderna och
+     egna, skapade kategorier). Kategorier med minst fem ospelade går först, så
+     att balansen aldrig tvingar fram upprepningar. */
   const kats = shuffle(kategorier().filter(k => k.fr.length >= 5)).sort((a,b) => ospelade(b) - ospelade(a));
-  const pick = shuffle(kats.slice(0, 12));
+  const fem = kats.filter(k => ospelade(k) >= 5);
+  const valda = fem.filter(k => !arKlassisk(k)).slice(0, 12 - MAX_KLASSISKA)
+    .concat(fem.filter(arKlassisk).slice(0, MAX_KLASSISKA));
+  for (const k of fem.concat(kats)) { if (valda.length >= 12) break; if (!valda.includes(k)) valda.push(k); }
+  const pick = shuffle(valda.slice(0, 12));
   const iSpelet = new Set();
   const mk = k => ({ t:k.t, q:[1,2,3,4,5].map(l => {
     const f = valjFraga(k.fr, l, iSpelet); iSpelet.add(f.id);
@@ -628,7 +731,14 @@ function enq(m, p, b, slaIhop){
   lsSet('fk-utkorg', OUT);
   clearTimeout(flushTimer); flushTimer = setTimeout(flush, 800);
 }
-function sattStatus(s, t){ HSTAT = s; HTEXT = t || ''; const el = document.getElementById('hpill'); if (el) el.outerHTML = pillHTML(); }
+function fotSpar(){
+  return { ok:'sparas i Homey', wait:'Homey svarar inte – sparas här tills vidare', err:'Homey-fel – sparas bara här', av:'sparas bara i den här webbläsaren' }[HSTAT] || 'sparas här';
+}
+function sattStatus(s, t){
+  HSTAT = s; HTEXT = t || '';
+  const el = document.getElementById('hpill'); if (el) el.outerHTML = pillHTML();
+  const f = document.getElementById('foot'); if (f && f.firstChild && f.firstChild.nodeType === 3) f.firstChild.nodeValue = `Frågekampen ${APP_VERSION} · ${fotSpar()} · ${arApp() ? 'körs som app' : 'körs i webbläsaren'}`;
+}
 async function flush(){
   if (flushing || !credOk()) return;
   flushing = true;
@@ -750,7 +860,9 @@ function byggPrompt(kat, antal){
   return [
     `Skriv ${antal} frågesportsfrågor på svenska till ett frågespel för vuxna i Sverige mellan 34 och 65 år.`,
     kat ? `Alla frågor ska höra till kategorin "${kat}".`
-        : `Fördela frågorna jämnt på några av dessa befintliga kategorier: ${allaKat.join(', ')}. Använd kategorinamnen exakt som de står.`,
+        : `Fördela frågorna jämnt på några av dessa befintliga kategorier, med tyngdpunkt på de moderna: ${allaKat.join(', ')}. Använd kategorinamnen exakt som de står.`,
+    'Stilen ska vara modern och varierad, inte klassisk frågesport. Undvik slitna standardfrågor om huvudstäder, kungar, grundämnen och årtal för krig. '
+      + 'Ta gärna frågor om populärkultur, musik, film och serier, appar och internet, spel, mat och trender, sport från 2000-talet och framåt, svensk vardag och saker man stöter på i dag – men bara sådant som inte ändras över tid.',
     `Svårighet 1–5: 1 = nästan alla vet, 3 = allmänbildad vet, 5 = svår men rättvis. Gör ${perNiva} frågor per svårighetsnivå${kat ? '' : ' och kategori'}.`,
     'Varje fråga ska ha ett entydigt, kort och faktamässigt säkert svar (helst 1–4 ord). Ta bara med frågor där du är helt säker på svaret.',
     'Inga flervalsfrågor, inga frågor om saker som kan ha ändrats de senaste åren, och inga frågor som avslöjar svaret.',
@@ -1078,7 +1190,7 @@ function render(bevaraFalt){
   document.getElementById('tools').innerHTML = toolsHTML();
   document.getElementById('modal').innerHTML = (!VIEW && S.screen === 'board') ? modalHTML() : '';
   document.getElementById('kanda').innerHTML = kandaNamn().map(n => `<option value="${esc(n)}"></option>`).join('');
-  document.getElementById('foot').innerHTML = `Frågekampen ${APP_VERSION} · ${credOk() ? 'sparas i Homey' : 'sparas i den här webbläsaren'} · ${arApp() ? 'körs som app' : 'körs i webbläsaren'}`
+  document.getElementById('foot').innerHTML = `Frågekampen ${APP_VERSION} · ${fotSpar()} · ${arApp() ? 'körs som app' : 'körs i webbläsaren'}`
     + (installEvent && !arApp() ? ` <button class="ghost" data-act="installera" style="margin-left:8px">Installera som app</button>` : '');
   if (!VIEW) {
     const openKey = S.screen === 'final-q' ? 'final' : (S.open && S.open.phase === 'q' ? `${S.round}-${S.open.c}-${S.open.r}` : null);
