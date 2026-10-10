@@ -125,6 +125,15 @@ th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted
 td.num,th.num{text-align:right}
 tr:last-child td{border-bottom:0}
 td.first{color:var(--brass);font-weight:800}
+.check{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-weight:600;color:var(--ink);cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--brass);margin:0}
+.check span{flex:1 1 0;min-width:0}
+.check small{flex-basis:100%;color:var(--muted);font-weight:400;font-size:13px;padding-left:30px}
+.kattab th,.kattab td{padding:8px 10px}
+.kattab td:first-child{white-space:normal}
+.kattab td small{color:var(--muted);font-weight:400}
+.ghost.liten{padding:4px 10px;font-size:13px}
+td.lag{color:var(--coral);font-weight:800}
 .genlist{display:flex;flex-direction:column;gap:8px}
 .genq{display:grid;grid-template-columns:2.2em 1fr auto;gap:10px;align-items:center;background:var(--felt);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .genq .lv{font-family:var(--f-display);color:var(--brass);text-align:center}
@@ -177,6 +186,19 @@ td.first{color:var(--brass);font-weight:800}
 .place .ps{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
 
 /* Ångra och meddelanden */
+.svar{display:flex;flex-direction:column;gap:10px}
+.fakta{margin:0;font-size:clamp(15px,2.2vw,18px);line-height:1.4;color:var(--card-ink);background:rgba(217,168,69,.18);border-left:4px solid var(--brass);padding:10px 12px;border-radius:0 10px 10px 0}
+.panel .fakta{color:var(--ink);background:var(--felt)}
+.fakta b{color:var(--card-label)}
+.panel .fakta b{color:var(--brass)}
+.glink{margin:0}
+.glank{color:#6b5634;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.panel .glank{color:var(--brass)}
+.kugg{font-size:18px;line-height:1;padding:6px 12px}
+.instlista{display:flex;flex-direction:column;gap:10px}
+.instrad{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--felt);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.instrad > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 200px}
+.instrad span{color:var(--muted);font-size:14px}
 .undo{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--card-ink);border:1px solid var(--ink);padding:7px 12px 7px 10px;font-size:14px;font-weight:800;max-width:100%;min-width:0}
 .undo:hover{filter:brightness(.95)}
 .undo .ar{font-family:var(--f-display);font-size:18px;line-height:1}
@@ -206,307 +228,307 @@ main{display:flex;flex-direction:column;gap:20px;min-width:0}
    Varje spel drar 12 kategorier och en fråga per nivå. Spelade frågor sparas så att nästa spel får nya. */
 const BANK = [
   { t:'Sverige runt', q:[
-    [1,'Vilken är Sveriges största sjö?','Vänern'],
-    [1,'I vilken stad ligger nöjesparken Liseberg?','Göteborg'],
-    [2,'Vilken bro förbinder Malmö med Köpenhamn?','Öresundsbron'],
-    [2,'Vilken är Sveriges största ö?','Gotland'],
-    [3,'Vad heter Sveriges högsta berg?','Kebnekaise (numera är nordtoppen högst, sedan glaciären på sydtoppen smält)'],
-    [3,'I vilket landskap ligger Mora och Siljan?','Dalarna'],
-    [4,'Vilken stad kallas "ruinernas och rosornas stad"?','Visby'],
-    [4,'Vilken kanal, invigd 1832, förbinder Vänern med Östersjön?','Göta kanal'],
-    [5,'Hur många landskap har Sverige?','25'],
-    [5,'Vilken är Sveriges nordligaste stad?','Kiruna'] ]},
+    [1,'Vilken är Sveriges största sjö?','Vänern',"Vänern är EU:s största sjö."],
+    [1,'I vilken stad ligger nöjesparken Liseberg?','Göteborg',"Liseberg öppnade 1923, samma år som Göteborg firade 300 år."],
+    [2,'Vilken bro förbinder Malmö med Köpenhamn?','Öresundsbron',"Bron är knappt 8 km lång och går över i en tunnel under vattnet på den danska sidan."],
+    [2,'Vilken är Sveriges största ö?','Gotland',"Gotland har över 90 kyrkor från medeltiden – fler än någon annan del av Norden."],
+    [3,'Vad heter Sveriges högsta berg?','Kebnekaise (numera är nordtoppen högst, sedan glaciären på sydtoppen smält)',"Glaciären på sydtoppen har smält så mycket att nordtoppen sedan 2019 är högst, cirka 2 097 meter."],
+    [3,'I vilket landskap ligger Mora och Siljan?','Dalarna',"Vasaloppet går 90 km mellan Sälen och Mora."],
+    [4,'Vilken stad kallas "ruinernas och rosornas stad"?','Visby',"Visby ringmur är runt 3,4 km lång, och staden är världsarv sedan 1995."],
+    [4,'Vilken kanal, invigd 1832, förbinder Vänern med Östersjön?','Göta kanal',"Kanalen grävdes till stor del för hand av omkring 58 000 soldater."],
+    [5,'Hur många landskap har Sverige?','25',"Landskapen har ingen administrativ roll i dag – det är län och regioner som styr."],
+    [5,'Vilken är Sveriges nordligaste stad?','Kiruna',"Stora delar av Kiruna flyttas österut eftersom gruvan får marken att spricka."] ]},
   { t:'80-talet', q:[
-    [1,'Vilken leksak med sex färgade sidor blev en världsdille kring 1980?','Rubiks kub'],
-    [1,'Vilken amerikansk TV-serie om oljefamiljen Ewing i Texas blev en jättesuccé?','Dallas'],
-    [2,'Vilket år vann Herreys Eurovision med "Diggi-Loo Diggi-Ley"?','1984'],
-    [2,'Vilket år mördades statsminister Olof Palme?','1986'],
-    [3,'Vilket datorspel med fallande block skapades i Sovjetunionen 1984?','Tetris'],
-    [3,'Vilken kärnkraftsolycka inträffade i Sovjetunionen i april 1986?','Tjernobyl'],
-    [4,'Vilket företag lanserade den bärbara kassettspelaren Walkman?','Sony'],
-    [4,'Vilken svensk vann Franska öppna i tennis 1982, bara 17 år gammal?','Mats Wilander'],
-    [5,'Vilken film av Lasse Hallström från 1985 blev Oscarsnominerad?','Mitt liv som hund'],
-    [5,'Vilken TV-kanal blev Sveriges första reklamfinansierade när den började sända via satellit 1987?','TV3'] ]},
+    [1,'Vilken leksak med sex färgade sidor blev en världsdille kring 1980?','Rubiks kub',"Kuben uppfanns 1974 av den ungerske arkitekten Ernő Rubik."],
+    [1,'Vilken amerikansk TV-serie om oljefamiljen Ewing i Texas blev en jättesuccé?','Dallas',"Avsnittet där man fick veta vem som sköt J.R. sågs av rekordmånga tittare i USA 1980."],
+    [2,'Vilket år vann Herreys Eurovision med "Diggi-Loo Diggi-Ley"?','1984',"Bröderna Herrey uppträdde i guldfärgade skor."],
+    [2,'Vilket år mördades statsminister Olof Palme?','1986',"Mordet skedde på Sveavägen i Stockholm den 28 februari 1986."],
+    [3,'Vilket datorspel med fallande block skapades i Sovjetunionen 1984?','Tetris',"Tetris skapades av Aleksej Pajitnov, och namnet kommer av 'tetra' och 'tennis'."],
+    [3,'Vilken kärnkraftsolycka inträffade i Sovjetunionen i april 1986?','Tjernobyl',"Det radioaktiva nedfallet upptäcktes först utanför Sovjet – vid Forsmarks kärnkraftverk."],
+    [4,'Vilket företag lanserade den bärbara kassettspelaren Walkman?','Sony',"Walkman kom 1979 och gjorde det möjligt att lyssna på musik var som helst."],
+    [4,'Vilken svensk vann Franska öppna i tennis 1982, bara 17 år gammal?','Mats Wilander',"Han är en av de yngsta som vunnit herrsingeln i Franska öppna."],
+    [5,'Vilken film av Lasse Hallström från 1985 blev Oscarsnominerad?','Mitt liv som hund',"Filmen nominerades till två Oscar, för regi och manus."],
+    [5,'Vilken TV-kanal blev Sveriges första reklamfinansierade när den började sända via satellit 1987?','TV3',"TV3 sände från London för att komma runt det svenska reklamförbudet i tv."] ]},
   { t:'Mat & dryck', q:[
-    [1,'Vilken frukt är huvudingrediensen i guacamole?','Avokado'],
-    [1,'Vilket bär blir sylten man äter till köttbullar?','Lingon'],
-    [2,'Vilken dag äter man traditionellt semlor?','Fettisdagen'],
-    [2,'Vad heter den italienska efterrätten med mascarpone och kaffedoppade kex?','Tiramisu'],
-    [3,'Vad kallas japanskt risvin?','Sake'],
-    [3,'Vilken fisk är surströmming gjord på?','Strömming (östersjösill)'],
-    [4,'Vilken krydda ger curry dess gula färg?','Gurkmeja'],
-    [4,'Vad heter den grekiska såsen med yoghurt, gurka och vitlök?','Tzatziki'],
-    [5,'Från vilket land kommer osten Manchego?','Spanien (regionen La Mancha)'],
-    [5,'Vilken krydda är världens dyraste räknat per vikt?','Saffran'] ]},
+    [1,'Vilken frukt är huvudingrediensen i guacamole?','Avokado',"Avokado är botaniskt sett ett bär."],
+    [1,'Vilket bär blir sylten man äter till köttbullar?','Lingon',"Lingon innehåller naturlig bensoesyra, därför håller rårörda lingon så länge."],
+    [2,'Vilken dag äter man traditionellt semlor?','Fettisdagen',"Kung Adolf Fredrik dog 1771 efter en stor måltid som enligt sägnen avslutades med semlor."],
+    [2,'Vad heter den italienska efterrätten med mascarpone och kaffedoppade kex?','Tiramisu',"Namnet betyder ungefär 'pigga upp mig' på italienska."],
+    [3,'Vad kallas japanskt risvin?','Sake',"Sake bryggs ungefär som öl, av ris, men har en alkoholhalt runt 15 procent."],
+    [3,'Vilken fisk är surströmming gjord på?','Strömming (östersjösill)',"Surströmmingspremiären var länge bestämd till tredje torsdagen i augusti."],
+    [4,'Vilken krydda ger curry dess gula färg?','Gurkmeja',"Gurkmeja är en jordstam i ingefärsfamiljen."],
+    [4,'Vad heter den grekiska såsen med yoghurt, gurka och vitlök?','Tzatziki',"En nästan likadan sås heter cacık i Turkiet."],
+    [5,'Från vilket land kommer osten Manchego?','Spanien (regionen La Mancha)',"Manchego görs på mjölk från fårrasen Manchega."],
+    [5,'Vilken krydda är världens dyraste räknat per vikt?','Saffran',"Det går åt runt 150 000 krokusblommor till ett kilo saffran."] ]},
   { t:'Sport', q:[
-    [1,'Hur många spelare har ett fotbollslag på planen samtidigt?','11'],
-    [1,'Hur många ringar har den olympiska symbolen?','5'],
-    [2,'I vilken sport tävlar man om Stanley Cup?','Ishockey'],
-    [2,'I vilken sport pratar man om "birdie" och "eagle"?','Golf'],
-    [3,'Vilken stad arrangerade sommar-OS 1912?','Stockholm'],
-    [3,'Vilket land vann fotbolls-VM 2014?','Tyskland'],
-    [4,'Hur lång är ett maratonlopp?','42,195 km'],
-    [4,'Vilken svensk slalomåkare vann 86 världscuptävlingar?','Ingemar Stenmark'],
-    [5,'Vilken svensk tog OS-guld i höjdhopp i Aten 2004?','Stefan Holm'],
-    [5,'I vilken stad hölls vinter-OS 1994?','Lillehammer'] ]},
+    [1,'Hur många spelare har ett fotbollslag på planen samtidigt?','11',"Ett lag måste ha minst sju spelare på planen, annars avbryts matchen."],
+    [1,'Hur många ringar har den olympiska symbolen?','5',"Ringarna ritades 1913 av Pierre de Coubertin, grundaren av de moderna olympiska spelen."],
+    [2,'I vilken sport tävlar man om Stanley Cup?','Ishockey',"Varje mästarlag får spelarnas namn ingraverade på pokalen."],
+    [2,'I vilken sport pratar man om "birdie" och "eagle"?','Golf',"En albatross är tre slag under par på ett hål – ännu ovanligare än en eagle."],
+    [3,'Vilken stad arrangerade sommar-OS 1912?','Stockholm',"Stockholms stadion byggdes till spelen och används fortfarande."],
+    [3,'Vilket land vann fotbolls-VM 2014?','Tyskland',"I semifinalen slog Tyskland värdlandet Brasilien med 7–1."],
+    [4,'Hur lång är ett maratonlopp?','42,195 km',"Den udda längden kommer från OS i London 1908, där banan drogs fram till kungalogen."],
+    [4,'Vilken svensk slalomåkare vann 86 världscuptävlingar?','Ingemar Stenmark',"Rekordet på 86 segrar stod sig i över 30 år."],
+    [5,'Vilken svensk tog OS-guld i höjdhopp i Aten 2004?','Stefan Holm',"Holm var bara 1,81 m lång men klarade 2,40 – nästan 60 cm över sin egen längd."],
+    [5,'I vilken stad hölls vinter-OS 1994?','Lillehammer',"Lillehammer kom bara två år efter Albertville, när vinter- och sommar-OS började varvas."] ]},
   { t:'Film & TV', q:[
-    [1,'Vem skrev böckerna om Pippi Långstrump?','Astrid Lindgren'],
-    [1,'Vad heter Kalle Ankas tre brorsöner?','Knatte, Fnatte och Tjatte'],
-    [2,'Vilken film från 1997 handlar om ett fartyg som sjönk 1912?','Titanic'],
-    [2,'Vilken författare skapade kommissarie Kurt Wallander?','Henning Mankell'],
-    [3,'I vilken fiktiv stad bor familjen Simpson?','Springfield'],
-    [3,'Vilket år visades Kalle Anka på julafton i svensk TV för första gången?','1960'],
-    [4,'Vilken svensk skådespelerska vann Oscar för både "Anastasia" och "Mordet på Orientexpressen"?','Ingrid Bergman'],
-    [4,'Vilken bokstav kallas James Bonds chef?','M'],
-    [5,'Vilket år hade "Sällskapsresan" premiär?','1980'],
-    [5,'Vem regisserade "Fanny och Alexander"?','Ingmar Bergman'] ]},
+    [1,'Vem skrev böckerna om Pippi Långstrump?','Astrid Lindgren',"Pippi kom till som en saga Astrid berättade för sin sjuka dotter Karin."],
+    [1,'Vad heter Kalle Ankas tre brorsöner?','Knatte, Fnatte och Tjatte',"På engelska heter de Huey, Dewey och Louie."],
+    [2,'Vilken film från 1997 handlar om ett fartyg som sjönk 1912?','Titanic',"Filmen vann 11 Oscar, delat rekord med Ben-Hur och Sagan om konungens återkomst."],
+    [2,'Vilken författare skapade kommissarie Kurt Wallander?','Henning Mankell',"Wallanderböckerna utspelar sig i Ystad."],
+    [3,'I vilken fiktiv stad bor familjen Simpson?','Springfield',"Namnet valdes för att det finns ett Springfield i många amerikanska delstater."],
+    [3,'Vilket år visades Kalle Anka på julafton i svensk TV för första gången?','1960',"Programmet heter 'Från alla oss till alla er' och har visats klockan 15 i årtionden."],
+    [4,'Vilken svensk skådespelerska vann Oscar för både "Anastasia" och "Mordet på Orientexpressen"?','Ingrid Bergman',"Hon vann tre Oscar – den första för Gasljus 1945."],
+    [4,'Vilken bokstav kallas James Bonds chef?','M',"M har i filmerna bland annat spelats av Judi Dench."],
+    [5,'Vilket år hade "Sällskapsresan" premiär?','1980',"Lasse Åberg spelade Stig-Helmer, en av Sveriges mest kända filmfigurer."],
+    [5,'Vem regisserade "Fanny och Alexander"?','Ingmar Bergman',"Filmen vann fyra Oscar, bland annat för bästa utländska film."] ]},
   { t:'Natur & vetenskap', q:[
-    [1,'Vilken planet kallas den röda planeten?','Mars'],
-    [1,'Vilket är jordens största däggdjur?','Blåvalen'],
-    [2,'Hur många ben har en spindel?','8'],
-    [2,'Vid hur många grader Celsius kokar vatten vid havsytan?','100'],
-    [3,'Vilket är människokroppens största organ?','Huden'],
-    [3,'Vad kallas processen där växter gör energi av solljus?','Fotosyntes'],
-    [4,'Vilket grundämne har den kemiska beteckningen Au?','Guld'],
-    [4,'Vilken stjärna ligger närmast jorden?','Solen'],
-    [5,'Vilken gas utgör största delen av jordens atmosfär?','Kväve (cirka 78 %)'],
-    [5,'Vilket grundämne har atomnummer 1?','Väte'] ]},
+    [1,'Vilken planet kallas den röda planeten?','Mars',"Den röda färgen kommer från järnoxid – rost – i marken."],
+    [1,'Vilket är jordens största däggdjur?','Blåvalen',"Blåvalen är det största djur som någonsin levt, större än alla dinosaurier."],
+    [2,'Hur många ben har en spindel?','8',"Spindlar är inte insekter utan spindeldjur, precis som skorpioner."],
+    [2,'Vid hur många grader Celsius kokar vatten vid havsytan?','100',"På Mount Everests topp kokar vatten redan vid ungefär 70 grader."],
+    [3,'Vilket är människokroppens största organ?','Huden',"En vuxens hud väger omkring 3–4 kilo."],
+    [3,'Vad kallas processen där växter gör energi av solljus?','Fotosyntes',"Det mesta av syret vi andas kommer från fotosyntes – en stor del från alger i haven."],
+    [4,'Vilket grundämne har den kemiska beteckningen Au?','Guld',"Au kommer från latinets aurum."],
+    [4,'Vilken stjärna ligger närmast jorden?','Solen',"Den näst närmaste stjärnan, Proxima Centauri, ligger drygt fyra ljusår bort."],
+    [5,'Vilken gas utgör största delen av jordens atmosfär?','Kväve (cirka 78 %)',"Syre utgör bara omkring 21 procent av luften."],
+    [5,'Vilket grundämne har atomnummer 1?','Väte',"Väte är det vanligaste grundämnet i universum."] ]},
   { t:'Världen', q:[
-    [1,'Vilken är världens största ocean?','Stilla havet'],
-    [1,'I vilken stad står Eiffeltornet?','Paris'],
-    [2,'Vilken flod rinner genom Kairo?','Nilen'],
-    [2,'Vilket land har flest invånare i världen?','Indien'],
-    [3,'I vilket land ligger Machu Picchu?','Peru'],
-    [3,'Vad heter Kanadas huvudstad?','Ottawa'],
-    [4,'Vad heter Australiens huvudstad?','Canberra'],
-    [4,'Vilket är världens minsta land till ytan?','Vatikanstaten'],
-    [5,'Vilket land har flest tidszoner?','Frankrike (tack vare sina utomeuropeiska territorier)'],
-    [5,'Vilken är världens längsta bergskedja på land?','Anderna'] ]},
+    [1,'Vilken är världens största ocean?','Stilla havet',"Stilla havet är större än all landyta på jorden tillsammans."],
+    [1,'I vilken stad står Eiffeltornet?','Paris',"Tornet byggdes till världsutställningen 1889 och var tänkt att rivas efter 20 år."],
+    [2,'Vilken flod rinner genom Kairo?','Nilen',"Nilen rinner norrut, från Afrikas inland till Medelhavet."],
+    [2,'Vilket land har flest invånare i världen?','Indien',"Indien gick om Kina som världens folkrikaste land 2023."],
+    [3,'I vilket land ligger Machu Picchu?','Peru',"Inkastaden ligger på cirka 2 400 meters höjd och blev känd för omvärlden 1911."],
+    [3,'Vad heter Kanadas huvudstad?','Ottawa',"Drottning Victoria valde Ottawa som huvudstad 1857."],
+    [4,'Vad heter Australiens huvudstad?','Canberra',"Canberra byggdes som en kompromiss mellan rivalerna Sydney och Melbourne."],
+    [4,'Vilket är världens minsta land till ytan?','Vatikanstaten',"Vatikanstaten är bara cirka 0,44 km² och har runt 800 invånare."],
+    [5,'Vilket land har flest tidszoner?','Frankrike (tack vare sina utomeuropeiska territorier)',"Med alla sina öar runt om i världen har Frankrike 12 tidszoner."],
+    [5,'Vilken är världens längsta bergskedja på land?','Anderna',"Anderna sträcker sig omkring 7 000 km längs Sydamerikas västkust."] ]},
   { t:'Musik', q:[
-    [1,'Vilken svensk grupp vann Eurovision 1974 med "Waterloo"?','ABBA'],
-    [1,'Vilket instrument är Jimi Hendrix mest känd för?','Elgitarr'],
-    [2,'Vem kallades "The King of Pop"?','Michael Jackson'],
-    [2,'Vilken svensk artist vann Eurovision 2012 med "Euphoria"?','Loreen'],
-    [3,'I vilket band var Freddie Mercury sångare?','Queen'],
-    [3,'Vilka fyra var med i The Beatles?','John Lennon, Paul McCartney, George Harrison och Ringo Starr'],
-    [4,'Vilka två bildade Roxette?','Per Gessle och Marie Fredriksson'],
-    [4,'Vilken kompositör skrev sin nionde symfoni trots att han var döv?','Ludwig van Beethoven'],
-    [5,'Vilken svensk låtskrivare och producent ligger bakom "...Baby One More Time" och "I Kissed a Girl"?','Max Martin'],
-    [5,'Vem sjöng "Främling" i Melodifestivalen 1983?','Carola'] ]},
+    [1,'Vilken svensk grupp vann Eurovision 1974 med "Waterloo"?','ABBA',"Namnet är bildat av första bokstaven i medlemmarnas förnamn."],
+    [1,'Vilket instrument är Jimi Hendrix mest känd för?','Elgitarr',"Hendrix var vänsterhänt och spelade ofta på en högergitarr vänd upp och ner."],
+    [2,'Vem kallades "The King of Pop"?','Michael Jackson',"Thriller från 1982 räknas som världens mest sålda album."],
+    [2,'Vilken svensk artist vann Eurovision 2012 med "Euphoria"?','Loreen',"Hon vann igen 2023 med 'Tattoo' och blev första kvinnan att vinna Eurovision två gånger."],
+    [3,'I vilket band var Freddie Mercury sångare?','Queen',"Freddie Mercury hette egentligen Farrokh Bulsara och föddes på Zanzibar."],
+    [3,'Vilka fyra var med i The Beatles?','John Lennon, Paul McCartney, George Harrison och Ringo Starr',"Ringo Starr ersatte trummisen Pete Best 1962."],
+    [4,'Vilka två bildade Roxette?','Per Gessle och Marie Fredriksson',"'The Look' blev etta i USA 1989 efter att en utbytesstudent tagit med skivan till en radiostation."],
+    [4,'Vilken kompositör skrev sin nionde symfoni trots att han var döv?','Ludwig van Beethoven',"Symfonin slutar med 'Ode till glädjen', som i dag är EU:s hymn."],
+    [5,'Vilken svensk låtskrivare och producent ligger bakom "...Baby One More Time" och "I Kissed a Girl"?','Max Martin',"Max Martin heter egentligen Karl Martin Sandberg."],
+    [5,'Vem sjöng "Främling" i Melodifestivalen 1983?','Carola',"Carola var bara 16 år när hon vann med 'Främling'."] ]},
   { t:'Historia', q:[
-    [1,'Vilket år föll Berlinmuren?','1989'],
-    [1,'Vilket år började andra världskriget?','1939'],
-    [2,'Vilket år landade människan för första gången på månen?','1969'],
-    [2,'Vem var USA:s första president?','George Washington'],
-    [3,'Vilket regalskepp sjönk i Stockholm 1628 på sin jungfrufärd?','Vasa'],
-    [3,'Vilket år nådde Columbus Amerika?','1492'],
-    [4,'Vilken svensk kung stupade vid Lützen 1632?','Gustav II Adolf'],
-    [4,'Vilket år blev Sverige medlem i EU?','1995'],
-    [5,'Vilket år gick Sverige över till högertrafik (Dagen H)?','1967'],
-    [5,'Vilken svensk drottning abdikerade 1654 och flyttade till Rom?','Kristina'] ]},
+    [1,'Vilket år föll Berlinmuren?','1989',"Muren föll den 9 november 1989 efter ett misstag på en presskonferens."],
+    [1,'Vilket år började andra världskriget?','1939',"Kriget började när Tyskland anföll Polen den 1 september."],
+    [2,'Vilket år landade människan för första gången på månen?','1969',"Apollo 11 landade den 20 juli 1969 och sågs i tv av hundratals miljoner."],
+    [2,'Vem var USA:s första president?','George Washington',"Washington är den ende presidenten som inte tillhörde något politiskt parti."],
+    [3,'Vilket regalskepp sjönk i Stockholm 1628 på sin jungfrufärd?','Vasa',"Skeppet bärgades 1961 och Vasamuseet är i dag ett av Skandinaviens mest besökta museer."],
+    [3,'Vilket år nådde Columbus Amerika?','1492',"Columbus trodde in i det sista att han hade nått Asien."],
+    [4,'Vilken svensk kung stupade vid Lützen 1632?','Gustav II Adolf',"Hans häst Streiff kom tillbaka från slaget och finns uppstoppad på Livrustkammaren."],
+    [4,'Vilket år blev Sverige medlem i EU?','1995',"Sverige gick med samtidigt som Finland och Österrike."],
+    [5,'Vilket år gick Sverige över till högertrafik (Dagen H)?','1967',"Omläggningen skedde klockan 05.00 den 3 september 1967."],
+    [5,'Vilken svensk drottning abdikerade 1654 och flyttade till Rom?','Kristina',"Hon blev katolik och ligger begravd i Peterskyrkan i Rom."] ]},
   { t:'Ord & språk', q:[
-    [1,'Vad kallas ett ord med motsatt betydelse, som "varm" och "kall"?','Antonym'],
-    [1,'Fyll i ordspråket: "Gå som katten kring het …"','gröt'],
-    [2,'Vad kallas ett ord som läses likadant baklänges, som "kajak"?','Palindrom'],
-    [2,'Vad heter "tack" på finska?','Kiitos'],
-    [3,'Vad betyder det latinska uttrycket "carpe diem"?','Fånga dagen'],
-    [3,'Vad kallas ord som låter likadant men stavas olika, som "jul" och "hjul"?','Homofoner'],
-    [4,'Vilket svenskt ord har blivit internationellt för en person som granskar myndigheter för medborgarnas räkning?','Ombudsman'],
-    [4,'Vilket är det officiella språket i Brasilien?','Portugisiska'],
-    [5,'Hur många bokstäver har det svenska alfabetet?','29'],
-    [5,'Vilket språk har flest modersmålstalare i världen?','Mandarin (kinesiska)'] ]},
+    [1,'Vad kallas ett ord med motsatt betydelse, som "varm" och "kall"?','Antonym',"Ord med samma betydelse, som 'glad' och 'lycklig', kallas synonymer."],
+    [1,'Fyll i ordspråket: "Gå som katten kring het …"','gröt',"Uttrycket betyder att man undviker att ta upp det viktiga ämnet."],
+    [2,'Vad kallas ett ord som läses likadant baklänges, som "kajak"?','Palindrom',"'Ni talar bra latin' är en klassisk svensk palindrommening."],
+    [2,'Vad heter "tack" på finska?','Kiitos',"Finska är inte släkt med svenska utan med estniska och, mer avlägset, ungerska."],
+    [3,'Vad betyder det latinska uttrycket "carpe diem"?','Fånga dagen',"Uttrycket kommer från den romerske poeten Horatius."],
+    [3,'Vad kallas ord som låter likadant men stavas olika, som "jul" och "hjul"?','Homofoner',"Ord som stavas lika men betyder olika saker, som 'fil', kallas homografer."],
+    [4,'Vilket svenskt ord har blivit internationellt för en person som granskar myndigheter för medborgarnas räkning?','Ombudsman',"Sverige inrättade världens första justitieombudsman, JO, år 1809."],
+    [4,'Vilket är det officiella språket i Brasilien?','Portugisiska',"Brasilien har runt 20 gånger fler invånare än Portugal."],
+    [5,'Hur många bokstäver har det svenska alfabetet?','29',"Å, Ä och Ö har funnits i svenskan sedan 1500-talet."],
+    [5,'Vilket språk har flest modersmålstalare i världen?','Mandarin (kinesiska)',"Räknar man även andraspråkstalare är engelska störst."] ]},
   { t:'Svenskt påhitt', q:[
-    [1,'Vilket möbelföretag grundades av Ingvar Kamprad?','IKEA'],
-    [1,'Vilken svensk musiktjänst med grön logga grundades 2006?','Spotify'],
-    [2,'Vilken svensk uppfann dynamiten?','Alfred Nobel'],
-    [2,'Vilket svenskt företag har byggt både stridsflygplanet Gripen och bilen 900?','Saab'],
-    [3,'Vilket bilmärke införde trepunktsbältet som standard 1959?','Volvo (uppfinnare: Nils Bohlin)'],
-    [3,'Vilket svenskt spelföretag skapade Minecraft?','Mojang'],
-    [4,'Vem har gett namn åt temperaturskalan där vatten kokar vid 100 grader?','Anders Celsius'],
-    [4,'Vilken klädkedja grundade Erling Persson i Västerås 1947?','H&M (då Hennes)'],
-    [5,'Vilket svenskt företag blev känt för mjölkförpackningar formade som en pyramid (tetraeder)?','Tetra Pak'],
-    [5,'Vilken svensk ingenjör konstruerade pacemakern som opererades in första gången 1958?','Rune Elmqvist (opererad av Åke Senning)'] ]},
+    [1,'Vilket möbelföretag grundades av Ingvar Kamprad?','IKEA',"Namnet kommer av Ingvar Kamprad, Elmtaryd och Agunnaryd."],
+    [1,'Vilken svensk musiktjänst med grön logga grundades 2006?','Spotify',"Spotify grundades av Daniel Ek och Martin Lorentzon."],
+    [2,'Vilken svensk uppfann dynamiten?','Alfred Nobel',"Nobel testamenterade sin förmögenhet till Nobelpriset, som delats ut sedan 1901."],
+    [2,'Vilket svenskt företag har byggt både stridsflygplanet Gripen och bilen 900?','Saab',"Saab står för Svenska Aeroplan Aktiebolaget."],
+    [3,'Vilket bilmärke införde trepunktsbältet som standard 1959?','Volvo (uppfinnare: Nils Bohlin)',"Volvo lät alla biltillverkare använda patentet fritt."],
+    [3,'Vilket svenskt spelföretag skapade Minecraft?','Mojang',"Microsoft köpte Mojang 2014 för 2,5 miljarder dollar."],
+    [4,'Vem har gett namn åt temperaturskalan där vatten kokar vid 100 grader?','Anders Celsius',"Från början var skalan omvänd – vatten kokade vid 0 och frös vid 100."],
+    [4,'Vilken klädkedja grundade Erling Persson i Västerås 1947?','H&M (då Hennes)',"'& Mauritz' kommer från jaktaffären Mauritz Widforss, som köptes upp 1968."],
+    [5,'Vilket svenskt företag blev känt för mjölkförpackningar formade som en pyramid (tetraeder)?','Tetra Pak',"Tetra Pak grundades av Ruben Rausing i Lund."],
+    [5,'Vilken svensk ingenjör konstruerade pacemakern som opererades in första gången 1958?','Rune Elmqvist (opererad av Åke Senning)',"Den första patienten, Arne Larsson, fick 26 pacemakrar under livet och blev 86 år."] ]},
   { t:'Blandat', q:[
-    [1,'Vilken veckodag är uppkallad efter guden Tor?','Torsdag'],
-    [1,'Hur många dagar har ett skottår?','366'],
-    [2,'Hur många kort finns i en vanlig kortlek utan jokrar?','52'],
-    [2,'Vilken färg har en smaragd?','Grön'],
-    [3,'Vilket år blev Carl XVI Gustaf kung?','1973'],
-    [3,'Hur många nollor har en miljard?','9'],
-    [4,'Hur många rutor har ett schackbräde?','64'],
-    [4,'Vilket tal står den romerska siffran L för?','50'],
-    [5,'Vilken är den enda bokstaven som inte finns i något av USA:s delstatsnamn?','Q'],
-    [5,'På vilket slott bor kungafamiljen sedan 1981?','Drottningholms slott'] ]},
+    [1,'Vilken veckodag är uppkallad efter guden Tor?','Torsdag',"Onsdag kommer från Oden och fredag från gudinnan Frigg."],
+    [1,'Hur många dagar har ett skottår?','366',"Skottdagen behövs för att kalendern ska hänga med jordens varv runt solen."],
+    [2,'Hur många kort finns i en vanlig kortlek utan jokrar?','52',"Lägger man ihop alla kortens valörer (kung = 13) blir summan 364."],
+    [2,'Vilken färg har en smaragd?','Grön',"Smaragd är en variant av mineralet beryll."],
+    [3,'Vilket år blev Carl XVI Gustaf kung?','1973',"Carl XVI Gustaf är den svenska kung som suttit längst på tronen."],
+    [3,'Hur många nollor har en miljard?','9',"På engelska heter en miljard 'billion', vilket ofta ger fel i översättningar."],
+    [4,'Hur många rutor har ett schackbräde?','64',"Det finns fler möjliga schackpartier än atomer i det kända universum."],
+    [4,'Vilket tal står den romerska siffran L för?','50',"C står för 100 och M för 1 000."],
+    [5,'Vilken är den enda bokstaven som inte finns i något av USA:s delstatsnamn?','Q',"Bokstaven J finns bara i en delstat: New Jersey."],
+    [5,'På vilket slott bor kungafamiljen sedan 1981?','Drottningholms slott',"Drottningholms slott är världsarv sedan 1991."] ]},
   { t:'90-talet', q:[
-    [1,'Vilken placering tog Sveriges herrlandslag i fotbolls-VM i USA 1994?','Trea (brons)'],
-    [1,'Vilket digitalt husdjur i form av ett ägg blev en dille 1997?','Tamagotchi'],
-    [2,'Vilken svensk grupp slog igenom världen över med "All That She Wants" 1992?','Ace of Base'],
-    [2,'Vad heter Segas snabba blå igelkott från 1991?','Sonic'],
-    [3,'Vilket år blev Nelson Mandela Sydafrikas president?','1994'],
-    [3,'Vad hette det berömda klonade fåret som föddes 1996?','Dolly'],
-    [4,'Vilket år delades Tjeckoslovakien i Tjeckien och Slovakien?','1993'],
-    [4,'Vem var Sveriges statsminister 1991–1994?','Carl Bildt'],
-    [5,'Till hur många procent höjde Riksbanken marginalräntan under kronkrisen i september 1992?','500 %'],
-    [5,'Vilket år röstade svenskarna ja till EU-medlemskap i en folkomröstning?','1994'] ]},
+    [1,'Vilken placering tog Sveriges herrlandslag i fotbolls-VM i USA 1994?','Trea (brons)',"Sverige slog Bulgarien med 4–0 i bronsmatchen."],
+    [1,'Vilket digitalt husdjur i form av ett ägg blev en dille 1997?','Tamagotchi',"Namnet kommer från japanska och anspelar på ägg och klocka."],
+    [2,'Vilken svensk grupp slog igenom världen över med "All That She Wants" 1992?','Ace of Base',"Gruppen kom från Göteborg."],
+    [2,'Vad heter Segas snabba blå igelkott från 1991?','Sonic',"Sonic skapades som Segas svar på Nintendos Mario."],
+    [3,'Vilket år blev Nelson Mandela Sydafrikas president?','1994',"Mandela hade suttit fängslad i 27 år när han släpptes 1990."],
+    [3,'Vad hette det berömda klonade fåret som föddes 1996?','Dolly',"Dolly döptes efter sångerskan Dolly Parton."],
+    [4,'Vilket år delades Tjeckoslovakien i Tjeckien och Slovakien?','1993',"Delningen kallas 'sammetsskilsmässan' eftersom den gick helt fredligt till."],
+    [4,'Vem var Sveriges statsminister 1991–1994?','Carl Bildt',"Carl Bildt var senare utrikesminister mellan 2006 och 2014."],
+    [5,'Till hur många procent höjde Riksbanken marginalräntan under kronkrisen i september 1992?','500 %',"Räntan låg på 500 procent bara några dagar – i november samma år släpptes kronan fri."],
+    [5,'Vilket år röstade svenskarna ja till EU-medlemskap i en folkomröstning?','1994',"Ja-sidan fick 52,3 procent av rösterna."] ]},
   { t:'Djur', q:[
-    [1,'Vilket är världens snabbaste landdjur?','Geparden'],
-    [1,'Hur många ben har en insekt?','6'],
-    [2,'Vilken fågel kan flyga baklänges?','Kolibrin'],
-    [2,'Vilket är Sveriges största rovdjur?','Brunbjörnen'],
-    [3,'Vilket är det enda däggdjuret som kan flyga på riktigt?','Fladdermusen'],
-    [3,'Vad äter jättepandan nästan uteslutande?','Bambu'],
-    [4,'Hur många hjärtan har en bläckfisk?','3'],
-    [4,'Vad kallas en sälunge?','Kut'],
-    [5,'Ungefär hur länge är en elefant dräktig?','Cirka 22 månader'],
-    [5,'Vad heter världens största ödla?','Komodovaran'] ]},
+    [1,'Vilket är världens snabbaste landdjur?','Geparden',"Geparden kan nå runt 100 km/h men orkar bara hålla farten en kort sträcka."],
+    [1,'Hur många ben har en insekt?','6',"Insektskroppen delas i huvud, mellankropp och bakkropp."],
+    [2,'Vilken fågel kan flyga baklänges?','Kolibrin',"Kolibrins vingar kan slå 50–80 slag i sekunden."],
+    [2,'Vilket är Sveriges största rovdjur?','Brunbjörnen',"Det finns omkring 3 000 brunbjörnar i Sverige."],
+    [3,'Vilket är det enda däggdjuret som kan flyga på riktigt?','Fladdermusen',"Det finns över 1 400 arter fladdermöss – ungefär var femte däggdjursart."],
+    [3,'Vad äter jättepandan nästan uteslutande?','Bambu',"En panda kan äta upp till 20 kilo bambu om dagen."],
+    [4,'Hur många hjärtan har en bläckfisk?','3',"Bläckfiskens blod är blått eftersom det bär syre med koppar i stället för järn."],
+    [4,'Vad kallas en sälunge?','Kut',"Gråsälen är Sveriges största sälart."],
+    [5,'Ungefär hur länge är en elefant dräktig?','Cirka 22 månader',"Det är den längsta dräktigheten bland landlevande däggdjur."],
+    [5,'Vad heter världens största ödla?','Komodovaran',"Komodovaranen kan bli runt tre meter lång och lever på några öar i Indonesien."] ]},
   { t:'Rymden', q:[
-    [1,'Vilken planet ligger närmast solen?','Merkurius'],
-    [1,'Vilken är solsystemets största planet?','Jupiter'],
-    [2,'Vilken planet är mest känd för sina ringar?','Saturnus'],
-    [2,'Hur många planeter finns i vårt solsystem?','8'],
-    [3,'Vem var den första människan att gå på månen?','Neil Armstrong'],
-    [3,'Vad heter galaxen vi bor i?','Vintergatan'],
-    [4,'Vem blev 1961 den första människan i rymden?','Jurij Gagarin'],
-    [4,'Vilken himlakropp slutade räknas som planet 2006?','Pluto'],
-    [5,'Ungefär hur lång tid tar det för solljuset att nå jorden?','Cirka 8 minuter'],
-    [5,'Vad heter den stora spiralgalax som är Vintergatans närmaste större granne?','Andromedagalaxen'] ]},
+    [1,'Vilken planet ligger närmast solen?','Merkurius',"Merkurius har inga månar, precis som Venus."],
+    [1,'Vilken är solsystemets största planet?','Jupiter',"Jupiters stora röda fläck är en storm som är större än jorden."],
+    [2,'Vilken planet är mest känd för sina ringar?','Saturnus',"Saturnus har så låg densitet att den skulle flyta i ett tillräckligt stort badkar."],
+    [2,'Hur många planeter finns i vårt solsystem?','8',"Pluto räknades som den nionde planeten fram till 2006."],
+    [3,'Vem var den första människan att gå på månen?','Neil Armstrong',"Buzz Aldrin kom ut strax efter, medan Michael Collins stannade kvar i kretsloppet."],
+    [3,'Vad heter galaxen vi bor i?','Vintergatan',"Vintergatan har uppskattningsvis 100–400 miljarder stjärnor."],
+    [4,'Vem blev 1961 den första människan i rymden?','Jurij Gagarin',"Hans färd med Vostok 1 tog 108 minuter."],
+    [4,'Vilken himlakropp slutade räknas som planet 2006?','Pluto',"Pluto räknas i dag som dvärgplanet."],
+    [5,'Ungefär hur lång tid tar det för solljuset att nå jorden?','Cirka 8 minuter',"Solljuset färdas omkring 150 miljoner km för att nå hit."],
+    [5,'Vad heter den stora spiralgalax som är Vintergatans närmaste större granne?','Andromedagalaxen',"Andromeda syns med blotta ögat en mörk natt och väntas krocka med Vintergatan om några miljarder år."] ]},
   { t:'Litteratur', q:[
-    [1,'Vem skrev böckerna om Harry Potter?','J.K. Rowling'],
-    [1,'Vilken detektiv bor på Baker Street 221B?','Sherlock Holmes'],
-    [2,'Vem skrev Millennium-trilogin?','Stieg Larsson'],
-    [2,'Vem skapade Mumintrollen?','Tove Jansson'],
-    [3,'Vem skrev romanen "1984"?','George Orwell'],
-    [3,'Vem skrev "Hundraåringen som klev ut genom fönstret och försvann"?','Jonas Jonasson'],
-    [4,'Vem blev 1909 den första kvinnan att få Nobelpriset i litteratur?','Selma Lagerlöf'],
-    [4,'Vad heter Vilhelm Mobergs romanserie om emigranter till Amerika?','Utvandrarna (Utvandrarserien)'],
-    [5,'Vilken svensk poet fick Nobelpriset i litteratur 2011?','Tomas Tranströmer'],
-    [5,'Vem skrev "Brott och straff"?','Fjodor Dostojevskij'] ]},
+    [1,'Vem skrev böckerna om Harry Potter?','J.K. Rowling',"Den första boken refuserades av ett tiotal förlag innan den gavs ut."],
+    [1,'Vilken detektiv bor på Baker Street 221B?','Sherlock Holmes',"Arthur Conan Doyle var läkare innan han blev författare."],
+    [2,'Vem skrev Millennium-trilogin?','Stieg Larsson',"Stieg Larsson dog 2004, innan den första boken hann ges ut."],
+    [2,'Vem skapade Mumintrollen?','Tove Jansson',"Tove Jansson var finlandssvensk och skrev på svenska."],
+    [3,'Vem skrev romanen "1984"?','George Orwell',"Uttrycket 'Storebror ser dig' kommer från boken."],
+    [3,'Vem skrev "Hundraåringen som klev ut genom fönstret och försvann"?','Jonas Jonasson',"Boken blev film 2013 med Robert Gustafsson i huvudrollen."],
+    [4,'Vem blev 1909 den första kvinnan att få Nobelpriset i litteratur?','Selma Lagerlöf',"Hon blev också den första kvinnan i Svenska Akademien, 1914."],
+    [4,'Vad heter Vilhelm Mobergs romanserie om emigranter till Amerika?','Utvandrarna (Utvandrarserien)',"Karl Oskar och Kristina utvandrar från Småland till Minnesota."],
+    [5,'Vilken svensk poet fick Nobelpriset i litteratur 2011?','Tomas Tranströmer',"Tranströmer var psykolog till yrket."],
+    [5,'Vem skrev "Brott och straff"?','Fjodor Dostojevskij',"Dostojevskij satt själv flera år i fångläger i Sibirien."] ]},
   { t:'Kroppen', q:[
-    [1,'Hur många tänder har en vuxen människa, visdomständerna inräknade?','32'],
-    [1,'Vilket organ pumpar runt blodet i kroppen?','Hjärtat'],
-    [2,'Vilket är kroppens längsta ben?','Lårbenet'],
-    [2,'Vilka organ renar blodet och bildar urin?','Njurarna'],
-    [3,'Vilken blodgrupp kallas universalgivare?','O negativ'],
-    [3,'Vad heter kroppens minsta ben, som sitter i örat?','Stigbygeln'],
-    [4,'Vad heter kroppens största muskel?','Stora sätesmuskeln'],
-    [4,'Vilket vitamin bildar huden med hjälp av solljus?','D-vitamin'],
-    [5,'Ungefär hur många liter blod har en vuxen människa?','Cirka 5 liter'],
-    [5,'Vilket ämne i de röda blodkropparna transporterar syre?','Hemoglobin'] ]},
+    [1,'Hur många tänder har en vuxen människa, visdomständerna inräknade?','32',"Barn har 20 mjölktänder."],
+    [1,'Vilket organ pumpar runt blodet i kroppen?','Hjärtat',"Hjärtat slår runt 100 000 gånger per dygn."],
+    [2,'Vilket är kroppens längsta ben?','Lårbenet',"Lårbenet är också kroppens starkaste ben."],
+    [2,'Vilka organ renar blodet och bildar urin?','Njurarna',"Njurarna filtrerar runt 180 liter vätska om dygnet."],
+    [3,'Vilken blodgrupp kallas universalgivare?','O negativ',"Den som har AB positiv kallas universalmottagare."],
+    [3,'Vad heter kroppens minsta ben, som sitter i örat?','Stigbygeln',"Stigbygeln är bara omkring 3 millimeter lång."],
+    [4,'Vad heter kroppens största muskel?','Stora sätesmuskeln',"Muskeln behövs för att vi ska kunna resa oss och gå upprätt."],
+    [4,'Vilket vitamin bildar huden med hjälp av solljus?','D-vitamin',"Under vinterhalvåret är solen i Sverige för svag för att huden ska bilda D-vitamin."],
+    [5,'Ungefär hur många liter blod har en vuxen människa?','Cirka 5 liter',"Blodet utgör ungefär 7–8 procent av kroppsvikten."],
+    [5,'Vilket ämne i de röda blodkropparna transporterar syre?','Hemoglobin',"Hemoglobin innehåller järn, som ger blodet dess röda färg."] ]},
   { t:'Teknik & prylar', q:[
-    [1,'Vilket företag tillverkar iPhone?','Apple'],
-    [1,'Vilket socialt nätverk grundade Mark Zuckerberg 2004?','Facebook'],
-    [2,'Vad står "www" för?','World Wide Web'],
-    [2,'Vilket företag skapade spelkonsolen PlayStation?','Sony'],
-    [3,'Vilket år lanserades den första iPhonen?','2007'],
-    [3,'Vad står förkortningen GPS för?','Global Positioning System'],
-    [4,'Vad står förkortningen USB för?','Universal Serial Bus'],
-    [4,'Vilket matematiskt ord – en etta följd av 100 nollor – gav Google dess namn?','Googol'],
-    [5,'Vem räknas som världens första programmerare, på 1840-talet?','Ada Lovelace'],
-    [5,'Vilket år skickades det första sms:et?','1992'] ]},
+    [1,'Vilket företag tillverkar iPhone?','Apple',"Apple grundades 1976 av Steve Jobs, Steve Wozniak och Ronald Wayne."],
+    [1,'Vilket socialt nätverk grundade Mark Zuckerberg 2004?','Facebook',"Facebook startade som ett nätverk bara för studenter på Harvard."],
+    [2,'Vad står "www" för?','World Wide Web',"Webben uppfanns av Tim Berners-Lee vid forskningscentret CERN 1989."],
+    [2,'Vilket företag skapade spelkonsolen PlayStation?','Sony',"Playstation började som ett samarbete med Nintendo om en cd-tillsats som aldrig blev av."],
+    [3,'Vilket år lanserades den första iPhonen?','2007',"Steve Jobs presenterade den som en iPod, en telefon och en internetenhet i ett."],
+    [3,'Vad står förkortningen GPS för?','Global Positioning System',"GPS byggdes av det amerikanska försvaret och har drygt 30 satelliter."],
+    [4,'Vad står förkortningen USB för?','Universal Serial Bus',"USB-C går att sätta i åt båda hållen."],
+    [4,'Vilket matematiskt ord – en etta följd av 100 nollor – gav Google dess namn?','Googol',"Ordet googol hittades på av en nioårig pojke, brorson till matematikern Edward Kasner."],
+    [5,'Vem räknas som världens första programmerare, på 1840-talet?','Ada Lovelace',"Ada Lovelace var dotter till poeten Lord Byron."],
+    [5,'Vilket år skickades det första sms:et?','1992',"Det första sms:et löd 'Merry Christmas'."] ]},
   /* ===== Moderna kategorier (2.2.0) ===== */
   { t:'Appar & internet', q:[
-    [1,'Vilken app har ett vitt spöke på gul bakgrund som logga?','Snapchat'],
-    [1,'Vilken videotjänst köptes av Google 2006?','YouTube'],
-    [2,'Vad heter tjänsten som svenska banker startade 2012 för att skicka pengar med mobilnumret?','Swish'],
-    [2,'Vilken meddelandeapp med grön logga ägs av Meta?','WhatsApp'],
-    [3,'Vilket år lanserades Instagram?','2010'],
-    [3,'Vad heter den svenska e-legitimationen som används för att logga in på banker och myndigheter?','BankID'],
-    [4,'Vilket nytt namn fick Twitter 2023?','X'],
-    [4,'Vilket svenskt spelföretag skapade Candy Crush Saga?','King'],
-    [5,'Vilket år startade Wikipedia?','2001'],
-    [5,'Vad står "QR" för i QR-kod?','Quick Response'] ]},
+    [1,'Vilken app har ett vitt spöke på gul bakgrund som logga?','Snapchat',"Spöket i loggan heter Ghostface Chillah."],
+    [1,'Vilken videotjänst köptes av Google 2006?','YouTube',"Den första videon, 'Me at the zoo', lades upp 2005."],
+    [2,'Vad heter tjänsten som svenska banker startade 2012 för att skicka pengar med mobilnumret?','Swish',"Ordet 'swisha' finns numera i Svenska Akademiens ordlista."],
+    [2,'Vilken meddelandeapp med grön logga ägs av Meta?','WhatsApp',"Facebook, som nu heter Meta, köpte WhatsApp 2014 för omkring 19 miljarder dollar."],
+    [3,'Vilket år lanserades Instagram?','2010',"Facebook köpte Instagram 2012 för en miljard dollar."],
+    [3,'Vad heter den svenska e-legitimationen som används för att logga in på banker och myndigheter?','BankID',"Mobilt BankID lanserades 2011."],
+    [4,'Vilket nytt namn fick Twitter 2023?','X',"Den blå fågeln i Twitters logga hette Larry, efter basketspelaren Larry Bird."],
+    [4,'Vilket svenskt spelföretag skapade Candy Crush Saga?','King',"Candy Crush Saga släpptes 2012, och King köptes senare av Activision Blizzard."],
+    [5,'Vilket år startade Wikipedia?','2001',"Engelska Wikipedia har över sex miljoner artiklar."],
+    [5,'Vad står "QR" för i QR-kod?','Quick Response',"QR-koden uppfanns 1994 av japanska Denso Wave för att spåra bildelar."] ]},
   { t:'Streaming & serier', q:[
-    [1,'Vilken streamingtjänst har ett rött N som logga?','Netflix'],
-    [1,'Vad heter TV4:s tävling där kändisar dansar i par?',"Let's Dance"],
-    [2,'Vilken Netflix-serie utspelar sig i staden Hawkins och har monstret Demogorgon?','Stranger Things'],
-    [2,'Vilken serie handlar om kampen om Järntronen i Westeros?','Game of Thrones'],
-    [3,'Vilken svensk Netflix-serie från 2021 utspelar sig på en internatskola och handlar om prins Wilhelm?','Young Royals'],
-    [3,'Vilken sydkoreansk Netflix-serie från 2021 handlar om dödliga barnlekar?','Squid Game'],
-    [4,'Vad heter Netflix-serien om den brittiska kungafamiljen som började sändas 2016?','The Crown'],
-    [4,'Vilken svensk-dansk kriminalserie utspelar sig kring Öresundsbron?','Bron'],
-    [5,'Vilken skådespelare spelar Walter White i Breaking Bad?','Bryan Cranston'],
-    [5,'I vilken amerikansk stad utspelar sig HBO-serien The Wire?','Baltimore'] ]},
+    [1,'Vilken streamingtjänst har ett rött N som logga?','Netflix',"Netflix började 1997 med att skicka dvd-filmer per post."],
+    [1,'Vad heter TV4:s tävling där kändisar dansar i par?',"Let's Dance","Programmet bygger på brittiska Strictly Come Dancing."],
+    [2,'Vilken Netflix-serie utspelar sig i staden Hawkins och har monstret Demogorgon?','Stranger Things',"Serien utspelar sig på 1980-talet och är full av referenser till tidens filmer."],
+    [2,'Vilken serie handlar om kampen om Järntronen i Westeros?','Game of Thrones',"Serien bygger på George R.R. Martins bokserie 'Sagan om is och eld'."],
+    [3,'Vilken svensk Netflix-serie från 2021 utspelar sig på en internatskola och handlar om prins Wilhelm?','Young Royals',"Prins Wilhelm spelas av Edvin Ryding."],
+    [3,'Vilken sydkoreansk Netflix-serie från 2021 handlar om dödliga barnlekar?','Squid Game',"Serien blev Netflix mest sedda serie någonsin när den kom."],
+    [4,'Vad heter Netflix-serien om den brittiska kungafamiljen som började sändas 2016?','The Crown',"Drottning Elizabeth II spelades av tre skådespelerskor, bland andra Claire Foy och Olivia Colman."],
+    [4,'Vilken svensk-dansk kriminalserie utspelar sig kring Öresundsbron?','Bron',"Sofia Helin spelar polisen Saga Norén."],
+    [5,'Vilken skådespelare spelar Walter White i Breaking Bad?','Bryan Cranston',"Bryan Cranston var tidigare känd som pappan i 'Malcolm i mitten'."],
+    [5,'I vilken amerikansk stad utspelar sig HBO-serien The Wire?','Baltimore',"Seriens skapare David Simon var tidigare kriminalreporter i Baltimore."] ]},
   { t:'2000-talet', q:[
-    [1,'Vilken valuta började användas som sedlar och mynt i bland annat Tyskland och Frankrike 2002?','Euro'],
-    [1,'Vad heter den gröna ogern som fick sin första film 2001?','Shrek'],
-    [2,'Vad heter den första Harry Potter-filmen, från 2001?','Harry Potter och de vises sten'],
-    [2,'Vilken svensk fotbollsspelare gjorde mål med klacken mot Italien i EM 2004?','Zlatan Ibrahimović'],
-    [3,'Vem vann den första säsongen av Idol i Sverige 2004?','Daniel Lindström'],
-    [3,'Vem vann Melodifestivalen 2006 med "Invincible"?','Carola'],
-    [4,'Vilken svensk film från 2004 om en dirigent som flyttar hem till sin barndomsby blev Oscarsnominerad?','Så som i himmelen'],
-    [4,'Vilket år invigdes Öresundsbron?','2000'],
-    [5,'Vilket år gick Sverige med i Schengensamarbetet i praktiken, med passfrihet?','2001'],
-    [5,'Vilket band vann Melodifestivalen 2007 med "The Worrying Kind"?','The Ark'] ]},
+    [1,'Vilken valuta började användas som sedlar och mynt i bland annat Tyskland och Frankrike 2002?','Euro',"Sverige röstade nej till euron i en folkomröstning 2003."],
+    [1,'Vad heter den gröna ogern som fick sin första film 2001?','Shrek',"Shrek vann den allra första Oscarn för bästa animerade film."],
+    [2,'Vad heter den första Harry Potter-filmen, från 2001?','Harry Potter och de vises sten',"Daniel Radcliffe var elva år när han fick rollen som Harry."],
+    [2,'Vilken svensk fotbollsspelare gjorde mål med klacken mot Italien i EM 2004?','Zlatan Ibrahimović',"Zlatan har vunnit Guldbollen som Sveriges bäste fotbollsspelare rekordmånga gånger."],
+    [3,'Vem vann den första säsongen av Idol i Sverige 2004?','Daniel Lindström',"Idol är den svenska versionen av brittiska Pop Idol."],
+    [3,'Vem vann Melodifestivalen 2006 med "Invincible"?','Carola',"Det var Carolas tredje vinst i Melodifestivalen."],
+    [4,'Vilken svensk film från 2004 om en dirigent som flyttar hem till sin barndomsby blev Oscarsnominerad?','Så som i himmelen',"Filmen regisserades av Kay Pollak och sågs av över en miljon svenskar på bio."],
+    [4,'Vilket år invigdes Öresundsbron?','2000',"Bron invigdes den 1 juli 2000 av kung Carl XVI Gustaf och drottning Margrethe."],
+    [5,'Vilket år gick Sverige med i Schengensamarbetet i praktiken, med passfrihet?','2001',"Schengen är en liten vinby i Luxemburg där avtalet skrevs under 1985."],
+    [5,'Vilket band vann Melodifestivalen 2007 med "The Worrying Kind"?','The Ark',"The Ark kommer från Växjötrakten i Småland."] ]},
   { t:'2010-talet', q:[
-    [1,'Vem vann Eurovision för Sverige 2015 med "Heroes"?','Måns Zelmerlöw'],
-    [1,'Vilket mobilspel fick folk att jaga figurer ute på gatorna sommaren 2016?','Pokémon Go'],
-    [2,'Vad hette den svenska DJ:n bakom "Wake Me Up" och "Levels"?','Avicii'],
-    [2,'Vilken utmaning gick ut på att hälla en hink iskallt vatten över sig 2014?','Ice Bucket Challenge'],
-    [3,'Vilket land vann fotbolls-VM 2018?','Frankrike'],
-    [3,'Vilken svensk tonåring började skolstrejka för klimatet 2018?','Greta Thunberg'],
-    [4,'Vilket år gifte sig kronprinsessan Victoria och Daniel Westling?','2010'],
-    [4,'Vilken låt av Psy blev 2012 den första videon på YouTube med en miljard visningar?','Gangnam Style'],
-    [5,'Vilket år röstade Storbritannien för att lämna EU?','2016'],
-    [5,'Vem var förbundskapten för Sveriges herrlandslag i fotboll vid VM 2018?','Janne Andersson'] ]},
+    [1,'Vem vann Eurovision för Sverige 2015 med "Heroes"?','Måns Zelmerlöw',"Måns uppträdde tillsammans med animerade figurer på en skärm bakom sig."],
+    [1,'Vilket mobilspel fick folk att jaga figurer ute på gatorna sommaren 2016?','Pokémon Go',"Spelet laddades ner över 500 miljoner gånger samma år."],
+    [2,'Vad hette den svenska DJ:n bakom "Wake Me Up" och "Levels"?','Avicii',"Avicii hette Tim Bergling."],
+    [2,'Vilken utmaning gick ut på att hälla en hink iskallt vatten över sig 2014?','Ice Bucket Challenge',"Utmaningen samlade in pengar till forskning om nervsjukdomen ALS."],
+    [3,'Vilket land vann fotbolls-VM 2018?','Frankrike',"Frankrike slog Kroatien med 4–2 i finalen i Moskva."],
+    [3,'Vilken svensk tonåring började skolstrejka för klimatet 2018?','Greta Thunberg',"Hennes plakat sa 'Skolstrejk för klimatet'."],
+    [4,'Vilket år gifte sig kronprinsessan Victoria och Daniel Westling?','2010',"Bröllopet hölls i Storkyrkan i Stockholm den 19 juni."],
+    [4,'Vilken låt av Psy blev 2012 den första videon på YouTube med en miljard visningar?','Gangnam Style',"Gangnam är ett välbärgat område i Seoul."],
+    [5,'Vilket år röstade Storbritannien för att lämna EU?','2016',"Utträdet blev verklighet först den 31 januari 2020."],
+    [5,'Vem var förbundskapten för Sveriges herrlandslag i fotboll vid VM 2018?','Janne Andersson',"Sverige gick till kvartsfinal i VM 2018."] ]},
   { t:'Spel & gaming', q:[
-    [1,'Vad heter Nintendos rörmokare med röd keps?','Mario'],
-    [1,'Vilket mobilspel går ut på att skjuta iväg arga fåglar mot grisar?','Angry Birds'],
-    [2,'Vilket spel börjar med att 100 spelare hoppar ut från en flygande buss?','Fortnite'],
-    [2,'Vilken Nintendo-konsol från 2017 går att spela både som handkonsol och på tv:n?','Nintendo Switch'],
-    [3,'Från vilket land kommer företaget som gjorde Angry Birds?','Finland'],
-    [3,'Vad heter svenske youtubern PewDiePie i förnamn?','Felix'],
-    [4,'Vilket Stockholmsföretag ligger bakom spelserien Battlefield?','DICE'],
-    [4,'Vad heter huvudpersonen i spelserien The Legend of Zelda?','Link'],
-    [5,'Vilket år kom den första Playstation-konsolen till Europa?','1995'],
-    [5,'Vad hette Segas sista spelkonsol, som slutade tillverkas 2001?','Dreamcast'] ]},
+    [1,'Vad heter Nintendos rörmokare med röd keps?','Mario',"Mario dök först upp i Donkey Kong 1981 och kallades då Jumpman."],
+    [1,'Vilket mobilspel går ut på att skjuta iväg arga fåglar mot grisar?','Angry Birds',"Spelet kom 2009 och blev senare film."],
+    [2,'Vilket spel börjar med att 100 spelare hoppar ut från en flygande buss?','Fortnite',"Fortnite görs av Epic Games."],
+    [2,'Vilken Nintendo-konsol från 2017 går att spela både som handkonsol och på tv:n?','Nintendo Switch',"Switch blev en av Nintendos mest sålda konsoler någonsin."],
+    [3,'Från vilket land kommer företaget som gjorde Angry Birds?','Finland',"Företaget heter Rovio och ligger i Esbo."],
+    [3,'Vad heter svenske youtubern PewDiePie i förnamn?','Felix',"Felix Kjellberg kommer från Göteborg."],
+    [4,'Vilket Stockholmsföretag ligger bakom spelserien Battlefield?','DICE',"DICE står för Digital Illusions Creative Entertainment."],
+    [4,'Vad heter huvudpersonen i spelserien The Legend of Zelda?','Link',"Många tror att han heter Zelda, men det är prinsessans namn."],
+    [5,'Vilket år kom den första Playstation-konsolen till Europa?','1995',"Konsolen kom först till Japan, i december 1994."],
+    [5,'Vad hette Segas sista spelkonsol, som slutade tillverkas 2001?','Dreamcast',"Efter Dreamcast slutade Sega göra konsoler och gör i dag bara spel."] ]},
   { t:'Mat & trender', q:[
-    [1,'Vilket sädesslag görs Oatlys drycker på?','Havre'],
-    [1,'Vad heter den japanska rätten med ris och rå fisk?','Sushi'],
-    [2,'Vad kallas den hawaiianska rätten med marinerad rå fisk i skål som blev populär på 2010-talet?','Poké bowl'],
-    [2,'Vad kallas kaffe som bryggs med kallt vatten i många timmar?','Cold brew'],
-    [3,'Vad heter den taiwanesiska drycken med tuggiga tapiokapärlor?','Bubble tea'],
-    [3,'Vad heter den koreanska rätten med fermenterad kål?','Kimchi'],
-    [4,'Vilken restaurang i Köpenhamn har flera gånger utsetts till världens bästa?','Noma'],
-    [4,'Vad kallas den syrliga, fermenterade tedrycken som blev trendig på 2010-talet?','Kombucha'],
-    [5,'Vad kallas den femte grundsmaken, efter sött, salt, surt och beskt?','Umami'],
-    [5,'Från vilket land kommer den fermenterade sojabönskakan tempeh?','Indonesien'] ]},
+    [1,'Vilket sädesslag görs Oatlys drycker på?','Havre',"Oatly kommer från Lund och bygger på forskning vid Lunds universitet."],
+    [1,'Vad heter den japanska rätten med ris och rå fisk?','Sushi',"Det är riset som gör det till sushi – rå fisk utan ris kallas sashimi."],
+    [2,'Vad kallas den hawaiianska rätten med marinerad rå fisk i skål som blev populär på 2010-talet?','Poké bowl',"Poké betyder ungefär 'skära i bitar' på hawaiiska."],
+    [2,'Vad kallas kaffe som bryggs med kallt vatten i många timmar?','Cold brew',"Kallbryggt kaffe blir ofta mindre bittert och syrligt än vanligt bryggkaffe."],
+    [3,'Vad heter den taiwanesiska drycken med tuggiga tapiokapärlor?','Bubble tea',"Drycken uppfanns i Taiwan på 1980-talet."],
+    [3,'Vad heter den koreanska rätten med fermenterad kål?','Kimchi',"I Korea finns hundratals sorters kimchi, och den äts till nästan varje måltid."],
+    [4,'Vilken restaurang i Köpenhamn har flera gånger utsetts till världens bästa?','Noma',"Namnet är en sammandragning av danskans 'nordisk mad'."],
+    [4,'Vad kallas den syrliga, fermenterade tedrycken som blev trendig på 2010-talet?','Kombucha',"Kombucha jäses med en så kallad scoby – en kultur av bakterier och jäst."],
+    [5,'Vad kallas den femte grundsmaken, efter sött, salt, surt och beskt?','Umami',"Umami beskrevs av den japanske kemisten Kikunae Ikeda 1908."],
+    [5,'Från vilket land kommer den fermenterade sojabönskakan tempeh?','Indonesien',"Tempeh kommer ursprungligen från ön Java."] ]},
   { t:'Musik idag', q:[
-    [1,'Vilken artist sjöng "Shake It Off" och gjorde världsturnén The Eras Tour?','Taylor Swift'],
-    [1,'Vem slog igenom med "Bad Guy" 2019?','Billie Eilish'],
-    [2,'Vilken brittisk sångare döper sina album efter matematiska tecken, som "÷" och "="?','Ed Sheeran'],
-    [2,'Vilken svensk artist sjöng "Dancing On My Own" 2010?','Robyn'],
-    [3,'Vilken sydkoreansk pojkgrupp fick en världshit med "Dynamite" 2020?','BTS'],
-    [3,'Vilken brittisk sångerskas album "21" från 2011 blev ett av decenniets mest sålda?','Adele'],
-    [4,'Vad heter den svenska duon bakom hiten "I Love It" från 2012?','Icona Pop'],
-    [4,'Vilken låt av Lil Nas X låg rekordlänge etta på amerikanska Billboardlistan 2019?','Old Town Road'],
-    [5,'Vilken svensk artist fick en internationell hit 2014 med "Habits (Stay High)"?','Tove Lo'],
-    [5,'Vilka norska tvillingar representerade Sverige i Eurovision 2024?','Marcus & Martinus'] ]},
+    [1,'Vilken artist sjöng "Shake It Off" och gjorde världsturnén The Eras Tour?','Taylor Swift',"The Eras Tour blev den mest inkomstbringande turnén någonsin."],
+    [1,'Vem slog igenom med "Bad Guy" 2019?','Billie Eilish',"Hon skriver musiken tillsammans med sin bror Finneas."],
+    [2,'Vilken brittisk sångare döper sina album efter matematiska tecken, som "÷" och "="?','Ed Sheeran',"Albumet '-' från 2023 avslutade hans serie med matematiska tecken."],
+    [2,'Vilken svensk artist sjöng "Dancing On My Own" 2010?','Robyn',"Robyn heter egentligen Robin Carlsson och slog igenom redan på 1990-talet."],
+    [3,'Vilken sydkoreansk pojkgrupp fick en världshit med "Dynamite" 2020?','BTS',"'Dynamite' var gruppens första låt helt på engelska."],
+    [3,'Vilken brittisk sångerskas album "21" från 2011 blev ett av decenniets mest sålda?','Adele',"Albumet heter '21' eftersom hon var 21 år när hon skrev det."],
+    [4,'Vad heter den svenska duon bakom hiten "I Love It" från 2012?','Icona Pop',"Charli XCX var med och skrev låten och sjunger också på den."],
+    [4,'Vilken låt av Lil Nas X låg rekordlänge etta på amerikanska Billboardlistan 2019?','Old Town Road',"Låten låg etta i 19 veckor, ett rekord då."],
+    [5,'Vilken svensk artist fick en internationell hit 2014 med "Habits (Stay High)"?','Tove Lo',"Tove Lo heter egentligen Tove Nilsson och kommer från Stockholm."],
+    [5,'Vilka norska tvillingar representerade Sverige i Eurovision 2024?','Marcus & Martinus',"Tvillingarna kommer från Trofors i Norge och slog igenom som barn."] ]},
   { t:'Vardagsteknik', q:[
-    [1,'Vad heter Apples röstassistent?','Siri'],
-    [1,'Vad heter Amazons röstassistent?','Alexa'],
-    [2,'Vilket företag tillverkar Galaxy-telefonerna?','Samsung'],
-    [2,'Vad kallas det när man loggar in med både lösenord och en extra kod, till exempel i mobilen?','Tvåfaktorsautentisering'],
-    [3,'Vad står "GB" för när man pratar om lagring i mobilen?','Gigabyte'],
-    [3,'Vilket företag gör Pixel-telefonerna?','Google'],
-    [4,'Vad heter standarden för trådlös laddning av mobiler, uppkallad efter ett kinesiskt ord för energi?','Qi'],
-    [4,'Vad heter Apples lilla spårningsbricka som lanserades 2021?','AirTag'],
-    [5,'Vad står förkortningen LED för?','Light-Emitting Diode'],
-    [5,'Vilket år lanserades den första iPaden?','2010'] ]}
+    [1,'Vad heter Apples röstassistent?','Siri',"Siri kom 2011 tillsammans med iPhone 4S."],
+    [1,'Vad heter Amazons röstassistent?','Alexa',"Namnet ska påminna om det antika biblioteket i Alexandria."],
+    [2,'Vilket företag tillverkar Galaxy-telefonerna?','Samsung',"Samsung började 1938 som en handelsfirma som bland annat sålde torkad fisk."],
+    [2,'Vad kallas det när man loggar in med både lösenord och en extra kod, till exempel i mobilen?','Tvåfaktorsautentisering',"Koder via sms är vanligast, men en app eller säkerhetsnyckel räknas som säkrare."],
+    [3,'Vad står "GB" för när man pratar om lagring i mobilen?','Gigabyte',"En gigabyte är ungefär en miljard byte."],
+    [3,'Vilket företag gör Pixel-telefonerna?','Google',"De första Pixel-telefonerna kom 2016."],
+    [4,'Vad heter standarden för trådlös laddning av mobiler, uppkallad efter ett kinesiskt ord för energi?','Qi',"Qi uttalas ungefär 'tji'."],
+    [4,'Vad heter Apples lilla spårningsbricka som lanserades 2021?','AirTag',"En AirTag hittar sin position med hjälp av andra Apple-enheter i närheten."],
+    [5,'Vad står förkortningen LED för?','Light-Emitting Diode',"Den blå lysdioden, som gjorde vitt LED-ljus möjligt, gav Nobelpriset i fysik 2014."],
+    [5,'Vilket år lanserades den första iPaden?','2010',"Steve Jobs visade den första iPaden i januari 2010."] ]}
 ];
 const FINALS = [
-  { cat:'Rymden', q:'Vem blev år 2006 den förste svensken i rymden?', a:'Christer Fuglesang' },
-  { cat:'Sverige', q:'Vilket år invigdes Globen (Avicii Arena) i Stockholm?', a:'1989' },
-  { cat:'Världen', q:'Vilken är Europas längsta flod?', a:'Volga' },
-  { cat:'Historia', q:'Vilket år röstade kvinnor för första gången i ett svenskt riksdagsval?', a:'1921' },
-  { cat:'Kroppen', q:'Hur många ben har en vuxen människa?', a:'206' },
-  { cat:'Konst', q:'Vilken svensk konstnär målade monumentalmålningen "Midvinterblot"?', a:'Carl Larsson' },
-  { cat:'Appar & internet', q:'Vilket år lanserades Spotify i Sverige?', a:'2008' },
-  { cat:'Streaming & serier', q:'Vilket år började Netflix sända i Sverige?', a:'2012' },
-  { cat:'Litteratur', q:'Vilket år gavs den första Harry Potter-boken ut?', a:'1997' }
+  { cat:'Rymden', q:'Vem blev år 2006 den förste svensken i rymden?', a:'Christer Fuglesang', fakta:"Han åkte med rymdfärjan Discovery till den internationella rymdstationen." },
+  { cat:'Sverige', q:'Vilket år invigdes Globen (Avicii Arena) i Stockholm?', a:'1989', fakta:"Globen är världens största sfäriska byggnad." },
+  { cat:'Världen', q:'Vilken är Europas längsta flod?', a:'Volga', fakta:"Volga mynnar ut i Kaspiska havet." },
+  { cat:'Historia', q:'Vilket år röstade kvinnor för första gången i ett svenskt riksdagsval?', a:'1921', fakta:"Kvinnlig rösträtt beslutades 1919, och 1921 valdes de första kvinnorna in i riksdagen." },
+  { cat:'Kroppen', q:'Hur många ben har en vuxen människa?', a:'206', fakta:"Ett nyfött barn har omkring 300 ben, som växer ihop med åren." },
+  { cat:'Konst', q:'Vilken svensk konstnär målade monumentalmålningen "Midvinterblot"?', a:'Carl Larsson', fakta:"Målningen hänger i Nationalmuseum efter decennier av debatt." },
+  { cat:'Appar & internet', q:'Vilket år lanserades Spotify i Sverige?', a:'2008', fakta:"Spotify lanserades i Sverige i oktober 2008." },
+  { cat:'Streaming & serier', q:'Vilket år började Netflix sända i Sverige?', a:'2012', fakta:"Netflix kom till Sverige och övriga Norden i oktober 2012." },
+  { cat:'Litteratur', q:'Vilket år gavs den första Harry Potter-boken ut?', a:'1997', fakta:"På engelska hette boken 'Harry Potter and the Philosopher's Stone'." }
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.5.0';
 const APP_ID = 'com.mawe.fragekampen';
 const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
@@ -544,9 +566,9 @@ const INBYGGDA = [];
 BANK.forEach((c, ci) => c.q.forEach((x, qi) => {
   const id = 'b-' + hash(x[1]);
   LEG[ci + '-' + qi] = id;
-  INBYGGDA.push({ id, kat:c.t, niva:x[0], q:x[1], a:x[2] });
+  INBYGGDA.push({ id, kat:c.t, niva:x[0], q:x[1], a:x[2], fakta:x[3] || '' });
 }));
-const FINALER = FINALS.map((f, i) => { const id = 'f-' + hash(f.q); LEG['f-' + i] = id; return { id, kat:f.cat, q:f.q, a:f.a }; });
+const FINALER = FINALS.map((f, i) => { const id = 'f-' + hash(f.q); LEG['f-' + i] = id; return { id, kat:f.cat, q:f.q, a:f.a, fakta:f.fakta || '' }; });
 /* De 60 frågorna + finalen som fanns i version 1.0 och 1.1, innan frågebanken kom */
 const ORIGINAL = [...Array(12).keys()].flatMap(c => [0,2,4,6,8].map(i => LEG[c+'-'+i])).concat(LEG['f-0']);
 
@@ -568,6 +590,22 @@ let migrerad = false;
   migrerad = true; saveD(); lsSet('fk-migr-3', true);
 })();
 
+/* Faktan slås upp på frågans id, så den följer med även i spel som startats
+   innan faktan fanns. */
+function faktaFor(id){
+  const f = INBYGGDA.find(x => x.id === id) || FINALER.find(x => x.id === id) || D.egna.find(x => x.id === id);
+  return (f && f.fakta) || '';
+}
+function googleHTML(q, a){
+  const url = 'https://www.google.com/search?q=' + encodeURIComponent(q + ' ' + a);
+  return `<a class="glank" href="${url}" target="_blank" rel="noopener">Googla svaret ↗</a>`;
+}
+function svarHTML(q, a, id){
+  const f = faktaFor(id);
+  return `<div class="svar"><p class="atext">Svar: <b>${esc(a)}</b></p>
+    ${f ? `<p class="fakta"><b>Visste du?</b> ${esc(f)}</p>` : ''}
+    <p class="glink">${googleHTML(q, a)}</p></div>`;
+}
 function pool(){ return INBYGGDA.concat(D.egna).filter(f => !D.slangda.has(f.id)); }
 function kategorier(){
   const m = new Map();
@@ -776,7 +814,8 @@ async function pull(){
   lokalaSlangda.forEach(id => enq('POST', '/slang', { id }));
   const serverEgna = new Set((d.egna || []).map(f => f.id));
   const lokalaEgna = D.egna.filter(f => !serverEgna.has(f.id) && !D.slangda.has(f.id));
-  D.egna = (d.egna || []).concat(lokalaEgna);
+  const lokalFakta = new Map(D.egna.filter(f => f.fakta).map(f => [f.id, f.fakta]));
+  D.egna = (d.egna || []).map(f => (!f.fakta && lokalFakta.has(f.id)) ? Object.assign({}, f, { fakta:lokalFakta.get(f.id) }) : f).concat(lokalaEgna);
   if (lokalaEgna.length && !OUT.some(o => o.p === '/fragor')) enq('POST', '/fragor', { fragor:lokalaEgna, kanda:INBYGGDA.map(f => f.id) });
   const serverRes = new Set((d.resultat || []).map(r => r.id));
   D.resultat = (d.resultat || []).filter(r => !raderas.has(r.id)).concat(D.resultat.filter(r => vantar.has(r.id) && !serverRes.has(r.id)));
@@ -857,34 +896,44 @@ function tolkaFragor(text){
     kat: String(x.kategori || x.kat || '').trim(),
     niva: Math.round(Number(x.niva ?? x['nivå'] ?? x.level)),
     q: String(x.fraga || x['fråga'] || x.question || '').trim(),
-    a: String(x.svar || x.answer || '').trim()
+    a: String(x.svar || x.answer || '').trim(),
+    fakta: String(x.fakta || x.funfact || x.fact || '').trim()
   })).filter(x => x.kat && x.q && x.a && x.niva >= 1 && x.niva <= 5);
 }
-function byggPrompt(kat, antal){
+/* Kategorier som är tomma eller nästan slut: färre än 10 ospelade (en ny
+   kategori har 10). Flest saknade först. */
+function lagaKategorier(){
+  return kategorier().filter(k => ospelade(k) < 10).sort((a,b) => ospelade(a) - ospelade(b) || a.t.localeCompare(b.t, 'sv'));
+}
+function byggPrompt(kat, antal, mal){
   const allaKat = kategorier().map(k => k.t);
-  const perNiva = Math.max(1, Math.round(antal / 5));
-  const finns = shuffle(pool().filter(f => !kat || norm(f.kat) === norm(kat)).map(f => f.q)).slice(0, 150);
+  const perKat = mal ? Math.max(5, Math.round(antal / mal.length)) : antal;
+  const perNiva = Math.max(1, Math.round((mal ? perKat : antal) / 5));
+  const iFokus = f => mal ? mal.some(m => norm(m) === norm(f.kat)) : (!kat || norm(f.kat) === norm(kat));
+  const finns = shuffle(pool().filter(iFokus).map(f => f.q)).slice(0, 150);
   return [
-    `Skriv ${antal} frågesportsfrågor på svenska till ett frågespel för vuxna i Sverige mellan 34 och 65 år.`,
-    kat ? `Alla frågor ska höra till kategorin "${kat}".`
+    `Skriv ${mal ? perKat * mal.length : antal} frågesportsfrågor på svenska till ett frågespel för vuxna i Sverige mellan 34 och 65 år.`,
+    mal ? `Frågorna ska fylla på just de här kategorierna, ${perKat} frågor i var och en: ${mal.join(', ')}. Använd kategorinamnen exakt som de står.`
+    : kat ? `Alla frågor ska höra till kategorin "${kat}".`
         : `Fördela frågorna jämnt på några av dessa befintliga kategorier, med tyngdpunkt på de moderna: ${allaKat.join(', ')}. Använd kategorinamnen exakt som de står.`,
     'Stilen ska vara modern och varierad, inte klassisk frågesport. Undvik slitna standardfrågor om huvudstäder, kungar, grundämnen och årtal för krig. '
       + 'Ta gärna frågor om populärkultur, musik, film och serier, appar och internet, spel, mat och trender, sport från 2000-talet och framåt, svensk vardag och saker man stöter på i dag – men bara sådant som inte ändras över tid.',
-    `Svårighet 1–5: 1 = nästan alla vet, 3 = allmänbildad vet, 5 = svår men rättvis. Gör ${perNiva} frågor per svårighetsnivå${kat ? '' : ' och kategori'}.`,
+    `Svårighet 1–5: 1 = nästan alla vet, 3 = allmänbildad vet, 5 = svår men rättvis. Gör ${perNiva} frågor per svårighetsnivå${kat && !mal ? '' : ' och kategori'}.`,
     'Varje fråga ska ha ett entydigt, kort och faktamässigt säkert svar (helst 1–4 ord). Ta bara med frågor där du är helt säker på svaret.',
+    'Till varje fråga: en kort, rolig och sann fakta (en mening, högst 120 tecken) som har med svaret att göra och som inte bara upprepar frågan.',
     'Inga flervalsfrågor, inga frågor om saker som kan ha ändrats de senaste åren, och inga frågor som avslöjar svaret.',
     finns.length ? 'Dessa frågor finns redan och får inte upprepas eller omformuleras:\n- ' + finns.join('\n- ') : '',
-    'Svara ENBART med en JSON-lista: [{"kategori":"...","niva":1,"fraga":"...","svar":"..."}]'
+    'Svara ENBART med en JSON-lista: [{"kategori":"...","niva":1,"fraga":"...","svar":"...","fakta":"..."}]'
   ].filter(Boolean).join('\n\n');
 }
-async function genereraFragor(kat, antal){
+async function genereraFragor(kat, antal, mal){
   if (GEN.kor) return;
   GEN = { kor:true, text:'Hämtar nyckeln…', nya:[] }; render(true);
   try {
     const nycklar = await geminiNycklar();
     if (!nycklar.length) throw new Error('Ingen Gemini-nyckel. Anslut Homey (Logic-variabeln gemini_api_key) eller klistra in en nyckel nedan.');
     GEN.text = 'Skriver frågor… det tar ofta 10–30 sekunder.'; render(true);
-    const prompt = byggPrompt(kat, antal);
+    const prompt = byggPrompt(kat, antal, mal);
     let text = null, sistFel = '';
     ute: for (const nyckel of nycklar) for (const modell of GEMINI_MODELLER) {
       try {
@@ -1047,7 +1096,7 @@ function finalJudgeHTML(){
   return `<section class="panel">
     <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
     <p class="bigq">${esc(S.game.final.q)}</p>
-    <p class="atext">Svar: <b>${esc(S.game.final.a)}</b></p>
+    ${svarHTML(S.game.final.q, S.game.final.a, S.game.final.id)}
     <div class="judge">${S.names.map((n,i)=>`<div class="jrow"><span>${esc(n)} · ${S.bets[i]}</span>
       <div class="tog"><button class="${S.fres[i]===true?'on y':''}" data-act="fres" data-p="${i}" data-v="1">Rätt</button>
       <button class="${S.fres[i]===false?'on n':''}" data-act="fres" data-p="${i}" data-v="0">Fel</button></div></div>`).join('')}</div>
@@ -1107,9 +1156,8 @@ function modalHTML(){
     body = `<p class="qtext">${esc(q)}</p>`;
     if (o.phase === 'q') {
       body += timerHTML() + `<div class="row"><button class="cta" data-act="reveal">Visa svaret</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
-      body += `<div><button class="plain" data-act="cancel">Stäng utan att använda rutan</button></div>`;
     } else {
-      body += `<p class="atext">Svar: <b>${esc(a)}</b></p>`;
+      body += svarHTML(q, a, id);
       body += `<p class="who">Svarade ${who} rätt?</p><div class="row"><button class="pbtn" data-act="dres" data-v="1">Rätt, +${pts}</button><button class="pbtn alt" data-act="dres" data-v="0">Fel</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
       body += D.slangda.has(id)
         ? `<p class="who">Frågan är slängd och kommer inte tillbaka</p>`
@@ -1155,22 +1203,47 @@ function bankHTML(){
           <label class="field" for="gen-antal">Antal
             <select id="gen-antal"><option>10</option><option selected>20</option><option>30</option></select></label>
         </div>
+        <label class="check" for="gen-fyll"><input type="checkbox" id="gen-fyll"><span>Fyll bara på tomma eller nästan slut kategorier</span>
+          <small>${(() => { const l = lagaKategorier(); return l.length ? 'Just nu: ' + l.slice(0, 6).map(k => `${esc(k.t)} (${ospelade(k)})`).join(', ') + (l.length > 6 ? ' …' : '') : 'Alla kategorier har minst 10 ospelade just nu.'; })()}</small></label>
         <div class="row"><button class="cta" data-act="gen" ${GEN.kor?'disabled':''}>${GEN.kor?'Skapar…':'Skapa frågor'}</button></div>
         ${GEN.text ? `<p class="note ${GEN.fel?'warn':GEN.ok?'good':''}" role="status">${esc(GEN.text)}</p>` : ''}
-        <p class="note">Gemini skriver frågorna. Nyckeln hämtas från Logic-variabeln <b>gemini_api_key</b> i Homey${harEgenNyckel ? ', med den inklistrade som reserv' : ''}. En ny kategori behöver minst 5 frågor för att hamna på spelplanen.</p>
-        <label class="field" for="gen-nyckel">Egen Gemini-nyckel <small>(valfritt – bara om Homey saknar den)</small><input id="gen-nyckel" type="password" autocomplete="off" spellcheck="false" placeholder="${harEgenNyckel?'sparad – skriv en ny för att byta':'AIza…'}"></label>
+        <p class="note">Gemini skriver frågorna och en kort fakta till varje. Nyckeln hämtas från Logic-variabeln <b>gemini_api_key</b> i Homey${harEgenNyckel ? ', med din egen nyckel som reserv' : ''}. Egen nyckel ställs in under ⚙ Inställningar. En ny kategori behöver minst 5 frågor för att hamna på spelplanen.</p>
       </div>
       <div class="panel" style="padding:16px;gap:12px">
         <h3>Kategorier</h3>
-        <div class="tblwrap"><table><thead><tr><th>Kategori</th><th class="num">Ospelade</th><th class="num">Totalt</th></tr></thead><tbody>
-          ${kats.map(k => `<tr><td>${esc(k.t)}${k.fr.some(f=>f.id.startsWith('e-'))?' <small style="color:var(--brass)">egna</small>':''}</td><td class="num">${ospelade(k)}</td><td class="num">${k.fr.length}</td></tr>`).join('')}
+        <div class="tblwrap"><table class="kattab"><thead><tr><th>Kategori</th><th class="num">Ospelade</th><th></th></tr></thead><tbody>
+          ${kats.map(k => { const o = ospelade(k), arm = confirmArm === 'tabortkat:' + k.t;
+            return `<tr><td>${esc(k.t)}${k.fr.some(f=>f.id.startsWith('e-'))?' <small style="color:var(--brass)">egna</small>':''}</td>
+              <td class="num${o < 5 ? ' lag' : ''}" ${o < 5 ? 'title="För få för att komma med på spelplanen"' : ''}>${o}<small> av ${k.fr.length}</small></td>
+              <td class="num"><button class="ghost liten${arm ? ' warn' : ''}" data-act="tabortkat" data-k="${esc(k.t)}">${arm ? 'Säker?' : 'Ta bort'}</button></td></tr>`; }).join('')}
         </tbody></table></div>
+        <p class="note">Ta bort slänger alla frågor i kategorin, så de aldrig kommer tillbaka. Röda tal betyder att kategorin har för få ospelade för att komma med på spelplanen.</p>
       </div>
     </div>
     ${GEN.nya.length ? `<h3>Nyss skapade</h3><div class="genlist">${GEN.nya.map(f => `<div class="genq"><span class="lv" title="Svårighet">${f.niva}</span>
       <span class="tx"><b>${esc(f.q)}</b><span>${esc(f.a)} · ${esc(f.kat)}</span></span>
       ${D.slangda.has(f.id) ? '<span class="note">Slängd</span>' : `<button class="ghost" data-act="slang" data-id="${esc(f.id)}">Släng</button>`}</div>`).join('')}</div>` : ''}
     <div class="row"><button class="ghost${confirmArm==='nollspel'?' warn':''}" data-act="nollspel">${armBtn('nollspel','Börja om med alla frågor')}</button></div>
+  </section>`;
+}
+
+/* ----- Inställningar ----- */
+function installningarHTML(){
+  const egen = lsGet('fk-gemini', '');
+  const kanJustera = S.screen === 'board';
+  return `<section class="panel"><h2>Inställningar</h2>
+    <div class="instlista">
+      <div class="instrad"><div><b>Justera poäng</b><span>${kanJustera ? 'Visar plus och minus vid varje spelare.' : 'Går när ett spel är igång på spelplanen.'}</span></div>
+        <button class="ghost" data-act="adjust" ${kanJustera ? '' : 'disabled'}>${S.adjust ? 'Klar med poängen' : 'Justera poäng'}</button></div>
+      <div class="instrad"><div><b>Statistik</b><span>Spel, vinster, snittpoäng och träffsäkerhet per spelare.</span></div>
+        <button class="ghost" data-act="view" data-v="stats">Visa statistik</button></div>
+      <div class="instrad"><div><b>Homey</b><span>${esc(fotSpar())}</span></div>
+        <button class="ghost" data-act="view" data-v="homey">Anslutning</button></div>
+    </div>
+    <h3>Gemini-nyckel</h3>
+    <p class="note">Används för att skapa frågor i Frågebanken. Nyckeln hämtas i första hand från Logic-variabeln <b>gemini_api_key</b> i Homey. En egen nyckel här används bara som reserv. ${egen ? '<b>En egen nyckel är sparad.</b>' : 'Ingen egen nyckel är sparad.'}</p>
+    <label class="field" for="gem-nyckel">Egen Gemini-nyckel<input id="gem-nyckel" type="password" autocomplete="off" spellcheck="false" placeholder="${egen ? 'sparad – skriv en ny för att byta' : 'AIza…'}"></label>
+    <div class="row"><button class="cta" data-act="sparanyckel">Spara nyckeln</button>${egen ? `<button class="ghost${confirmArm==='glomnyckel'?' warn':''}" data-act="glomnyckel">${armBtn('glomnyckel','Ta bort nyckeln')}</button>` : ''}</div>
   </section>`;
 }
 
@@ -1205,9 +1278,10 @@ function homeyHTML(){
 function toolsHTML(){
   const b = [undoHTML(), pillHTML()].filter(Boolean);
   if (VIEW) { b.push(`<button class="ghost" data-act="view" data-v="">← Till spelet</button>`); return b.join(''); }
-  b.push(`<button class="ghost" data-act="view" data-v="stats">Statistik</button>`, `<button class="ghost" data-act="view" data-v="bank">Frågebanken</button>`);
+  b.push(`<button class="ghost" data-act="view" data-v="bank">Frågebanken</button>`,
+    `<button class="ghost kugg" data-act="view" data-v="installningar" aria-label="Inställningar" title="Inställningar">⚙</button>`);
   if (S.screen === 'board') {
-    b.push(`<button class="ghost" data-act="adjust">${S.adjust ? 'Klar med poängen' : 'Justera poäng'}</button>`);
+    if (S.adjust) b.push(`<button class="ghost warn" data-act="adjust">Klar med poängen</button>`);
     if (!roundDone()) b.push(`<button class="ghost${confirmArm==='skip'?' warn':''}" data-act="skip">${armBtn('skip', S.round===0?'Hoppa till omgång 2':'Hoppa till finalen')}</button>`);
   }
   if (S.screen !== 'setup') b.push(`<button class="ghost${confirmArm==='reset'?' warn':''}" data-act="reset">${armBtn('reset','Nytt spel')}</button>`);
@@ -1223,11 +1297,11 @@ let lastOpenKey = null;
 function render(bevaraFalt){
   const fokus = bevaraFalt && document.activeElement && document.activeElement.id;
   const falt = {};
-  if (bevaraFalt) document.querySelectorAll('#main input, #main select').forEach(e => { falt[e.id] = e.value; });
+  if (bevaraFalt) document.querySelectorAll('#main input, #main select').forEach(e => { falt[e.id] = e.type === 'checkbox' ? { kryss:e.checked } : e.value; });
   const m = document.getElementById('main');
-  m.innerHTML = VIEW ? ({ stats:statsHTML, bank:bankHTML, homey:homeyHTML })[VIEW]()
+  m.innerHTML = VIEW ? ({ stats:statsHTML, bank:bankHTML, homey:homeyHTML, installningar:installningarHTML })[VIEW]()
     : ({ setup:setupHTML, board:boardHTML, 'final-bet':finalBetHTML, 'final-q':finalQHTML, 'final-judge':finalJudgeHTML, end:endHTML })[S.screen]();
-  for (const id in falt) { const e = document.getElementById(id); if (e && e.type !== 'password') e.value = falt[id]; }
+  for (const id in falt) { const e = document.getElementById(id); if (!e || e.type === 'password') continue; if (e.type === 'checkbox') e.checked = falt[id].kryss; else e.value = falt[id]; }
   if (fokus) { const e = document.getElementById(fokus); if (e) e.focus(); }
   document.getElementById('tools').innerHTML = toolsHTML();
   if (BYTKAT != null && (VIEW || S.screen !== 'board' || S.open)) BYTKAT = null;
@@ -1301,10 +1375,21 @@ document.addEventListener('click', e => {
       if (confirmArm !== 'hglom') { arm('hglom'); render(true); return; }
       confirmArm = null; lsSet(CRED_KEY, { token:'', homeyId:'', lan:'', fran:'frånkopplad' }); sattStatus('av'); render(); return;
     case 'gen': {
-      const nyckel = document.getElementById('gen-nyckel').value.trim();
-      if (nyckel) lsSet('fk-gemini', nyckel);
       const kat = document.getElementById('gen-ny').value.trim() || document.getElementById('gen-kat').value;
-      genereraFragor(kat, +document.getElementById('gen-antal').value || 20); return; }
+      const antal = +document.getElementById('gen-antal').value || 20;
+      if (!kat && document.getElementById('gen-fyll').checked) {
+        const mal = lagaKategorier().slice(0, Math.max(1, Math.floor(antal / 5))).map(k => k.t);
+        if (!mal.length) { GEN = { kor:false, text:'Alla kategorier har minst 10 ospelade frågor, så det finns inget att fylla på.', nya:[] }; render(true); return; }
+        genereraFragor('', antal, mal); return;
+      }
+      genereraFragor(kat, antal); return; }
+    case 'tabortkat': {
+      const namn = el.dataset.k;
+      if (confirmArm !== 'tabortkat:' + namn) { arm('tabortkat:' + namn); render(true); return; }
+      confirmArm = null;
+      const k = kategorier().find(x => x.t === namn); if (!k) return;
+      k.fr.forEach(f => slangFraga(f.id));
+      toast(`${namn} är borttagen (${k.fr.length} frågor)`); render(true); return; }
     case 'slang': slangFraga(el.dataset.id); toast('Frågan är slängd'); render(true); return;
     case 'nollspel':
       if (confirmArm !== 'nollspel') { arm('nollspel'); render(true); return; }
@@ -1316,6 +1401,13 @@ document.addEventListener('click', e => {
       if (confirmArm !== 'slangq') { arm('slangq'); render(); return; }
       confirmArm = null; slangFraga(el.dataset.id); toast('Frågan är slängd'); render(); return;
     case 'undo': undo(); commit(); return;
+    case 'sparanyckel': {
+      const v = document.getElementById('gem-nyckel').value.trim();
+      if (!v) { toast('Skriv in en nyckel först'); return; }
+      lsSet('fk-gemini', v); toast('Nyckeln är sparad'); render(); return; }
+    case 'glomnyckel':
+      if (confirmArm !== 'glomnyckel') { arm('glomnyckel'); render(); return; }
+      confirmArm = null; try { localStorage.removeItem('fk-gemini'); } catch(e) {} toast('Nyckeln är borttagen'); render(); return;
     case 'bytkat': BYTKAT = +el.dataset.c; render(); return;
     case 'bytavbryt': BYTKAT = null; render(); return;
     case 'installera': if (installEvent) { installEvent.prompt(); installEvent.userChoice.finally(() => { installEvent = null; render(true); }); } return;
@@ -1357,7 +1449,6 @@ document.addEventListener('click', e => {
       S.rf[vem][ratt ? 0 : 1]++;
       markeraSpelad(curRound().cats[o.c].q[o.r][2]);
       S.turn = vem; closeQ(); break; }
-    case 'cancel': snap('Stäng frågan'); S.open = null; break;
     case 'valkat': {
       const c = BYTKAT; if (c == null) return;
       let namn = el.dataset.k;
@@ -1390,7 +1481,7 @@ document.addEventListener('click', e => {
       markeraSpelad(gammal.id);
       S.game.final = { id:f.id, cat:f.kat, q:f.q, a:f.a }; nyTimer = true;
       toast('Ny finalfråga – den förra kommer inte tillbaka'); break; }
-    case 'adjust': snap(S.adjust ? 'Klar med poängen' : 'Justera poäng'); S.adjust = !S.adjust; break;
+    case 'adjust': if (S.screen !== 'board') return; snap(S.adjust ? 'Klar med poängen' : 'Justera poäng'); S.adjust = !S.adjust; VIEW = null; break;
     case 'adj': snap(`${+el.dataset.d > 0 ? '+' : '−'}100 för ${S.names[p]}`); S.scores[p] += +el.dataset.d; break;
     case 'next':
       snap(S.round === 0 ? 'Till omgång 2' : 'Till finalen');
