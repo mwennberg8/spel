@@ -99,6 +99,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .panel h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:800}
 .panel p{margin:0}
 .names{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rval{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.rlbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{background:var(--felt);color:var(--ink);border-radius:0;padding:8px 16px;font-family:var(--f-display);font-size:18px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--brass);color:var(--card-ink)}
 .order{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:560px}
 .orow{display:grid;grid-template-columns:2em minmax(0,1fr) repeat(3,40px);gap:6px;align-items:center}
 .onr{font-family:var(--f-display);color:var(--brass);font-size:20px;text-align:center}
@@ -194,6 +200,16 @@ td.lag{color:var(--coral);font-weight:800}
 .glink{margin:0}
 .glank{color:#6b5634;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .panel .glank{color:var(--brass)}
+.jchip{display:inline-flex;align-items:center;justify-content:center;margin-left:8px;width:22px;height:22px;border-radius:6px;background:var(--brass);color:var(--card-ink);font-family:var(--f-display);font-size:13px;vertical-align:middle}
+.jchip.slut{background:transparent;color:var(--muted);border:1px dashed var(--line);text-decoration:line-through}
+.jokerrad{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-top:4px;border-top:1px dashed var(--card-edge)}
+.jokerrad span{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--card-label)}
+.jokerinfo{margin:0;background:var(--brass);color:var(--card-ink);border-radius:8px;padding:6px 10px;font-weight:800;align-self:flex-start}
+.stold{display:flex;flex-direction:column;gap:8px}
+.stold .big{font-family:var(--f-display);font-size:clamp(34px,8vw,64px);color:var(--coral);line-height:1;margin:0}
+.stold p{margin:0;font-size:18px}
+.tog2{min-width:64px}
+.tog2.on{background:var(--brass);color:var(--card-ink);border-color:var(--brass)}
 .kugg{font-size:18px;line-height:1;padding:6px 12px}
 .instlista{display:flex;flex-direction:column;gap:10px}
 .instrad{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--felt);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -528,11 +544,21 @@ const FINALS = [
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.7.0';
 const APP_ID = 'com.mawe.fragekampen';
-const STEPS = [100,200], RNAMES = ['Omgång 1','Omgång 2'];
+/* Omgång 1 ger 100–500, omgång 2 200–1000, omgång 3 300–1500 osv. */
+const MAX_RUNDOR = 4;
 const DEF = ['Spelare 1','Spelare 2','Spelare 3','Spelare 4','Spelare 5','Spelare 6'];
 const MIN_SPELARE = 2, MAX_SPELARE = 8;
+/* Valbara regler, sparade per enhet. Båda på från början. */
+const regler = () => Object.assign({ stold:true, joker:true }, lsGet('fk-regler', {}) || {});
+/* Stöld kräver minst tre spelare: med två är nästa i tur den som frågar och redan sett svaret. */
+const stoldGar = () => regler().stold && S.names.length >= 3;
+const tjuv = () => (ans() + 1) % S.names.length;
+const halva = p => Math.round(p / 2 / 50) * 50 || 50;
+/* Svensk genitiv: Annas, men Markus och Max utan extra s. */
+const genitiv = n => /[sxz]$/i.test(n) ? n : n + 's';
+const jokerKvar = i => regler().joker && !(S.jokerAnv || [])[i];
 /* "Spelare 3" är bara en platshållare, inget riktigt namn. */
 const ararNamn = n => !n || /^Spelare \d+$/.test(n);
 const nollor = (n, v) => Array.from({ length:n }, () => (typeof v === 'function' ? v() : v));
@@ -634,9 +660,11 @@ const KLASSISKA = new Set(['Sverige runt','Mat & dryck','Sport','Natur & vetensk
   'Svenskt påhitt','Blandat','Djur','Rymden','Litteratur','Kroppen'].map(norm));
 const MAX_KLASSISKA = 5;
 const arKlassisk = k => KLASSISKA.has(norm(k.t));
-function buildGame(){
+function buildGame(antal){
+  const nR = Math.max(1, Math.min(MAX_RUNDOR, antal || 2)), nK = nR * 6;
+  const maxKl = Math.round(nK * MAX_KLASSISKA / 12);
   let recycled = false;
-  if (ospeladeTotalt() < 60) {
+  if (ospeladeTotalt() < nK * 5) {
     const behall = [...D.spelade].filter(id => id.startsWith('f-'));
     D.spelade = new Set(behall); saveD(); recycled = true;
     enq('POST', '/nollstall', { vad:'spelade', behall });
@@ -649,16 +677,17 @@ function buildGame(){
      att balansen aldrig tvingar fram upprepningar. */
   const kats = shuffle(kategorier().filter(k => k.fr.length >= 5)).sort((a,b) => ospelade(b) - ospelade(a));
   const fem = kats.filter(k => ospelade(k) >= 5);
-  const valda = fem.filter(k => !arKlassisk(k)).slice(0, 12 - MAX_KLASSISKA)
-    .concat(fem.filter(arKlassisk).slice(0, MAX_KLASSISKA));
-  for (const k of fem.concat(kats)) { if (valda.length >= 12) break; if (!valda.includes(k)) valda.push(k); }
-  const pick = shuffle(valda.slice(0, 12));
+  const valda = fem.filter(k => !arKlassisk(k)).slice(0, nK - maxKl)
+    .concat(fem.filter(arKlassisk).slice(0, maxKl));
+  for (const k of fem.concat(kats)) { if (valda.length >= nK) break; if (!valda.includes(k)) valda.push(k); }
+  const pick = shuffle(valda.slice(0, nK));
   const iSpelet = new Set();
   const mk = k => ({ t:k.t, q:[1,2,3,4,5].map(l => {
     const f = valjFraga(k.fr, l, iSpelet); iSpelet.add(f.id);
     return [f.q, f.a, f.id];
   })});
-  const rundor = [pick.slice(0,6).map(mk), pick.slice(6,12).map(mk)];
+  const rundor = [];
+  for (let r = 0; r < nR; r++) rundor.push(pick.slice(r * 6, r * 6 + 6).map(mk));
   let final = shuffle(FINALER.filter(f => !D.spelade.has(f.id)))[0];
   if (!final) {
     const svar = shuffle(pool().filter(f => f.niva >= 4 && !D.spelade.has(f.id) && !iSpelet.has(f.id))).sort((a,b) => b.niva - a.niva)[0];
@@ -674,10 +703,13 @@ function pickDoubles(){
   let c2 = Math.floor(Math.random()*5); if (c2 >= c1) c2++;
   return [c1+'-'+(1+Math.floor(Math.random()*4)), c2+'-'+(1+Math.floor(Math.random()*4))];
 }
-function fresh(names){
+/* Hur många omgångar som går: varje omgång behöver sex kategorier med minst fem frågor. */
+const maxRundor = () => Math.max(1, Math.min(MAX_RUNDOR, Math.floor(kategorier().filter(k => k.fr.length >= 5).length / 6)));
+function fresh(names, rundor){
   const nm = (names || (D.spelare.length >= MIN_SPELARE ? D.spelare : DEF)).slice(0, MAX_SPELARE), n = nm.length;
-  return { v:3, id:uid(), t:0, game:buildGame(), screen:'setup', names:nm, scores:nollor(n, 0),
-    rf:nollor(n, () => [0,0]), turn:0, round:0, used:[[],[]], dbl:[pickDoubles(),pickDoubles()], open:null,
+  const nR = Math.min(maxRundor(), rundor || lsGet('fk-rundor', 2) || 2);
+  return { v:3, id:uid(), t:0, game:buildGame(nR), screen:'setup', names:nm, scores:nollor(n, 0),
+    rf:nollor(n, () => [0,0]), turn:0, round:0, used:nollor(nR, () => []), dbl:nollor(nR, pickDoubles), open:null,
     bets:nollor(n, 0), fres:nollor(n, null), adjust:false };
 }
 function migreraSpel(g){
@@ -691,8 +723,11 @@ let S = lsGet(KEY, null);
 if (!S || S.v !== 3) S = migreraSpel(lsGet('fragekampen-v2', null)) || fresh();
 function saveS(){ lsSet(KEY, S); }
 
-const val = r => STEPS[S.round] * (r+1);
-const curRound = () => ({ name:RNAMES[S.round], step:STEPS[S.round], cats:S.game.rounds[S.round] });
+const antalRundor = () => S.game.rounds.length;
+const sistaRundan = () => S.round >= antalRundor() - 1;
+const val = r => 100 * (S.round + 1) * (r + 1);
+const curRound = () => ({ name:'Omgång ' + (S.round + 1), step:100 * (S.round + 1), cats:S.game.rounds[S.round] });
+const nastaText = (forb) => sistaRundan() ? (forb ? 'Hoppa till finalen' : 'Till finalen') : `${forb ? 'Hoppa till' : 'Till'} omgång ${S.round + 2}`;
 const isDbl = (c,r) => S.dbl[S.round].includes(c+'-'+r);
 const isUsed = (c,r) => S.used[S.round].includes(c+'-'+r);
 const ans = () => (S.turn + 1) % S.names.length;
@@ -1015,7 +1050,7 @@ function seatsHTML(highlight){
     <div class="seat${highlight && i===ans() ? ' active' : ''}${highlight && i===S.turn ? ' asking' : ''}">
       <span class="lbl">${!highlight ? '' : i===S.turn ? 'Frågar' : i===ans() ? 'Svarar' : ''}</span>
       <span class="nm">${esc(n)}</span>
-      <span class="sc${S.scores[i]<0?' neg':''}">${S.scores[i]}</span>
+      <span class="sc${S.scores[i]<0?' neg':''}">${S.scores[i]}${highlight && regler().joker ? `<span class="jchip${jokerKvar(i) ? '' : ' slut'}" title="${jokerKvar(i) ? 'Jokern finns kvar' : 'Jokern är använd'}">J</span>` : ''}</span>
       ${S.adjust ? `<div class="adj"><button data-act="adj" data-p="${i}" data-d="-100">−100</button><button data-act="adj" data-p="${i}" data-d="100">+100</button></div>` : ''}
     </div>`).join('')}</section>`;
 }
@@ -1037,16 +1072,20 @@ function setupHTML(){
       <button class="ghost" data-act="pblanda">Blanda ordningen</button>
       <span class="note">${S.names.length} spelare${30 % S.names.length ? ' · frågorna går inte jämnt ut, så några svarar på en fråga mer per omgång' : ''}</span>
     </div>
+    <div class="rval"><span class="rlbl">Antal omgångar</span><div class="seg" role="group" aria-label="Antal omgångar">${[1,2,3,4].map(n => `<button class="${antalRundor()===n?'on':''}" data-act="rundor" data-n="${n}" ${n > maxRundor() ? 'disabled title="För få kategorier i frågebanken"' : ''} aria-pressed="${antalRundor()===n}">${n}</button>`).join('')}</div>
+      <span class="note">${antalRundor() * 30} frågor + final · högsta ruta ${antalRundor() * 500} poäng</span></div>
     <ul class="rules">
       <li>Sätt er i stolsordning runt bordet. <b>En frågar, och den som sitter efter svarar.</b></li>
       <li>Den som svarar väljer kategori och poäng. Den som frågar håller i skärmen, läser upp frågan och visar svaret.</li>
       <li>Rätt svar ger poängen, fel svar ger noll. Sedan går frågandet ett steg vidare: den som nyss svarade frågar nästa person.</li>
       <li>Två rutor per omgång är <b>Dubbel</b> och ger dubbla poäng.</li>
       <li>Vill ni inte ha en kategori? Tryck på dess rubrik och välj en annan. Använda rutor påverkas inte.</li>
-      <li>Omgång 2 ger dubbla värden. I <b>finalen</b> svarar alla och satsar poäng innan frågan visas. Fel svar kostar insatsen.</li>
+      <li>Varje ny omgång ger högre värden: 100–500, sedan 200–1000 och så vidare. I <b>finalen</b> svarar alla och satsar poäng innan frågan visas. Fel svar kostar insatsen.</li>
+      ${regler().stold ? '<li><b>Stöld:</b> svarar någon fel får nästa runt bordet försöka för halva poängen (minst tre spelare).</li>' : ''}
+      ${regler().joker ? '<li><b>Joker:</b> varje spelare har en joker per spel – byt fråga eller fråga bordet om hjälp. Ett J vid poängen visar att den finns kvar.</li>' : ''}
       <li>Tryckte någon fel? <b>Ångra</b> uppe bland knapparna tar tillbaka senaste trycket.</li>
     </ul>
-    <p class="note">Frågebanken: <b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade${egna ? `, varav ${egna} egna` : ''}. Varje spel drar 60 nya.${S.game.recycled ? ' Alla frågor hade använts, så banken har börjat om.' : ''}</p>
+    <p class="note">Frågebanken: <b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade${egna ? `, varav ${egna} egna` : ''}. Varje spel drar ${antalRundor() * 30} nya.${S.game.recycled ? ' Alla frågor hade använts, så banken har börjat om.' : ''}</p>
     ${STORAGE_OK ? '' : '<p class="note warn">Den här webbläsaren låter inte spelet spara något. Öppna spelet i Chrome eller Safari i stället för i en förhandsvisning.</p>'}
     ${ORIGINAL.some(id => !D.spelade.has(id)) && !D.resultat.length ? '<div class="row"><button class="ghost" data-act="markold">Vi har redan spelat de första frågorna (version 1.0–1.1)</button></div>' : ''}
     <div class="row"><button class="cta" data-act="start">Starta spelet</button></div>
@@ -1069,7 +1108,7 @@ function boardHTML(){
     h += `<button class="cell${u?' used':''}" id="cell-${c}-${r}" ${u?'disabled aria-label="Använd"':`data-act="cell" data-c="${c}" data-r="${r}" aria-label="${esc(R.cats[c].t)} för ${val(r)}"`}>${u?'':val(r)}</button>`;
   }
   h += `</section>`;
-  if (roundDone()) h += `<div class="banner"><p>${R.name} är klar!</p><button class="cta" data-act="next">${S.round===0?'Till omgång 2':'Till finalen'}</button></div>`;
+  if (roundDone()) h += `<div class="banner"><p>${R.name} är klar!</p><button class="cta" data-act="next">${nastaText(false)}</button></div>`;
   return h + seatsHTML(true);
 }
 
@@ -1146,7 +1185,8 @@ function modalHTML(){
   const o = S.open; if (!o) return '';
   const R = curRound(), cat = R.cats[o.c], [q,a,id,egenKat] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
   const meta = `<div class="qmeta"><span>${esc(egenKat || cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
-    <p class="who">${asker} läser upp för ${who}</p>`;
+    <p class="who">${asker} läser upp för ${who}</p>
+    ${o.bordet ? `<p class="jokerinfo">Joker: ${who} får ta hjälp av bordet</p>` : ''}`;
   let body;
   if (o.phase === 'dbl') {
     body = `<div class="double"><p class="big">Dubbel!</p>
@@ -1156,6 +1196,13 @@ function modalHTML(){
     body = `<p class="qtext">${esc(q)}</p>`;
     if (o.phase === 'q') {
       body += timerHTML() + `<div class="row"><button class="cta" data-act="reveal">Visa svaret</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
+      if (jokerKvar(ans()) && !o.bordet) body += `<div class="jokerrad"><span>${esc(genitiv(S.names[ans()]))} joker:</span><button class="pbtn alt" data-act="joker" data-typ="byt">Byt fråga</button><button class="pbtn alt" data-act="joker" data-typ="bordet">Fråga bordet</button></div>`;
+    } else if (o.phase === 'stold') {
+      const t = esc(S.names[tjuv()]), h = halva(pts);
+      body += `<div class="stold"><p class="big">Stöld!</p>
+        <p>${who} svarade fel. <b>${t}</b> får försöka för <b>${h}</b> poäng.</p>
+        <p class="who">Läs inte upp svaret ännu</p></div>
+        <div class="row"><button class="pbtn" data-act="stold" data-v="1">Rätt, +${h} till ${t}</button><button class="pbtn alt" data-act="stold" data-v="0">Fel</button></div>`;
     } else {
       body += svarHTML(q, a, id);
       body += `<p class="who">Svarade ${who} rätt?</p><div class="row"><button class="pbtn" data-act="dres" data-v="1">Rätt, +${pts}</button><button class="pbtn alt" data-act="dres" data-v="0">Fel</button><button class="pbtn alt" data-act="nyfraga">Redan fått – ny fråga</button></div>`;
@@ -1237,6 +1284,10 @@ function installningarHTML(){
         <button class="ghost" data-act="adjust" ${kanJustera ? '' : 'disabled'}>${S.adjust ? 'Klar med poängen' : 'Justera poäng'}</button></div>
       <div class="instrad"><div><b>Statistik</b><span>Spel, vinster, snittpoäng och träffsäkerhet per spelare.</span></div>
         <button class="ghost" data-act="view" data-v="stats">Visa statistik</button></div>
+      <div class="instrad"><div><b>Stöld</b><span>Svarar någon fel får nästa runt bordet försöka för halva poängen. Kräver minst tre spelare.</span></div>
+        <button class="ghost tog2${regler().stold ? ' on' : ''}" data-act="regel" data-k="stold" aria-pressed="${regler().stold}">${regler().stold ? 'På' : 'Av'}</button></div>
+      <div class="instrad"><div><b>Joker</b><span>Varje spelare har en joker per spel: byt fråga eller fråga bordet om hjälp.</span></div>
+        <button class="ghost tog2${regler().joker ? ' on' : ''}" data-act="regel" data-k="joker" aria-pressed="${regler().joker}">${regler().joker ? 'På' : 'Av'}</button></div>
       <div class="instrad"><div><b>Homey</b><span>${esc(fotSpar())}</span></div>
         <button class="ghost" data-act="view" data-v="homey">Anslutning</button></div>
     </div>
@@ -1282,7 +1333,7 @@ function toolsHTML(){
     `<button class="ghost kugg" data-act="view" data-v="installningar" aria-label="Inställningar" title="Inställningar">⚙</button>`);
   if (S.screen === 'board') {
     if (S.adjust) b.push(`<button class="ghost warn" data-act="adjust">Klar med poängen</button>`);
-    if (!roundDone()) b.push(`<button class="ghost${confirmArm==='skip'?' warn':''}" data-act="skip">${armBtn('skip', S.round===0?'Hoppa till omgång 2':'Hoppa till finalen')}</button>`);
+    if (!roundDone()) b.push(`<button class="ghost${confirmArm==='skip'?' warn':''}" data-act="skip">${armBtn('skip', nastaText(true))}</button>`);
   }
   if (S.screen !== 'setup') b.push(`<button class="ghost${confirmArm==='reset'?' warn':''}" data-act="reset">${armBtn('reset','Nytt spel')}</button>`);
   return b.join('');
@@ -1401,6 +1452,7 @@ document.addEventListener('click', e => {
       if (confirmArm !== 'slangq') { arm('slangq'); render(); return; }
       confirmArm = null; slangFraga(el.dataset.id); toast('Frågan är slängd'); render(); return;
     case 'undo': undo(); commit(); return;
+    case 'regel': { const r = regler(); r[el.dataset.k] = !r[el.dataset.k]; lsSet('fk-regler', r); render(); return; }
     case 'sparanyckel': {
       const v = document.getElementById('gem-nyckel').value.trim();
       if (!v) { toast('Skriv in en nyckel först'); return; }
@@ -1411,6 +1463,12 @@ document.addEventListener('click', e => {
     case 'bytkat': BYTKAT = +el.dataset.c; render(); return;
     case 'bytavbryt': BYTKAT = null; render(); return;
     case 'installera': if (installEvent) { installEvent.prompt(); installEvent.userChoice.finally(() => { installEvent = null; render(true); }); } return;
+    case 'rundor': {
+      if (S.screen !== 'setup') return;
+      const n = Math.min(maxRundor(), +el.dataset.n || 2);
+      lasNamn(); lsSet('fk-rundor', n);
+      S.game = buildGame(n); S.round = 0; S.used = nollor(n, () => []); S.dbl = nollor(n, pickDoubles);
+      saveS(); render(); return; }
     case 'pupp': case 'pned': case 'pbort': case 'pny': case 'pblanda': {
       if (S.screen !== 'setup') return;
       lasNamn();
@@ -1432,7 +1490,7 @@ document.addEventListener('click', e => {
       snap('Starta spelet');
       lasNamn();
       S.names = S.names.map((n,i) => (ararNamn(n) ? 'Spelare ' + (i+1) : n));
-      { const n = S.names.length; S.scores = nollor(n, 0); S.rf = nollor(n, () => [0,0]); S.bets = nollor(n, 0); S.fres = nollor(n, null); S.turn = 0; }
+      { const n = S.names.length; S.scores = nollor(n, 0); S.rf = nollor(n, () => [0,0]); S.bets = nollor(n, 0); S.fres = nollor(n, null); S.turn = 0; S.jokerAnv = nollor(n, false); }
       D.spelare = S.names.slice(); saveD(); enq('PUT', '/spelare', { namn:S.names }, 'spelare');
       S.screen = 'board'; break; }
     case 'cell': {
@@ -1448,7 +1506,31 @@ document.addEventListener('click', e => {
       if (ratt) S.scores[vem] += pts;
       S.rf[vem][ratt ? 0 : 1]++;
       markeraSpelad(curRound().cats[o.c].q[o.r][2]);
+      /* Fel och stöld påslagen: nästa runt bordet får chansen innan frågan stängs. */
+      if (!ratt && stoldGar()) { o.phase = 'stold'; break; }
       S.turn = vem; closeQ(); break; }
+    case 'stold': {
+      const o = S.open, pts = val(o.r) * (isDbl(o.c,o.r) ? 2 : 1), h = halva(pts), t = tjuv(), ratt = el.dataset.v === '1';
+      snap(ratt ? `Stöld, +${h} till ${S.names[t]}` : `Stölden misslyckades för ${S.names[t]}`);
+      if (ratt) { S.scores[t] += h; S.rf[t][0]++; }
+      S.turn = ans(); closeQ(); break; }
+    case 'joker': {
+      const o = S.open, vem = ans();
+      if (!jokerKvar(vem)) return;
+      if (el.dataset.typ === 'byt') {
+        const kat = curRound().cats[o.c], gammal = kat.q[o.r];
+        const f = ersattning(kat.t, o.r + 1, idnISpelet());
+        if (!f) { toast('Det finns inga ospelade frågor kvar att byta till.'); return; }
+        snap(`Joker: ${S.names[vem]} bytte fråga`);
+        markeraSpelad(gammal[2]);
+        kat.q[o.r] = [f.q, f.a, f.id].concat(norm(f.kat) !== norm(kat.t) ? [f.kat] : []);
+        nyTimer = true;
+      } else {
+        snap(`Joker: ${S.names[vem]} frågar bordet`);
+        o.bordet = true;
+      }
+      S.jokerAnv = (S.jokerAnv || []).slice(); S.jokerAnv[vem] = true;
+      break; }
     case 'valkat': {
       const c = BYTKAT; if (c == null) return;
       let namn = el.dataset.k;
@@ -1484,14 +1566,14 @@ document.addEventListener('click', e => {
     case 'adjust': if (S.screen !== 'board') return; snap(S.adjust ? 'Klar med poängen' : 'Justera poäng'); S.adjust = !S.adjust; VIEW = null; break;
     case 'adj': snap(`${+el.dataset.d > 0 ? '+' : '−'}100 för ${S.names[p]}`); S.scores[p] += +el.dataset.d; break;
     case 'next':
-      snap(S.round === 0 ? 'Till omgång 2' : 'Till finalen');
-      if (S.round === 0) { S.round = 1; } else { S.screen = 'final-bet'; S.adjust = false; }
+      snap(nastaText(false));
+      if (!sistaRundan()) { S.round++; } else { S.screen = 'final-bet'; S.adjust = false; }
       break;
     case 'skip':
       if (confirmArm !== 'skip') { arm('skip'); render(); return; }
       confirmArm = null;
-      snap(S.round === 0 ? 'Hoppa till omgång 2' : 'Hoppa till finalen');
-      if (S.round === 0) S.round = 1; else { S.screen = 'final-bet'; S.adjust = false; }
+      snap(nastaText(true));
+      if (!sistaRundan()) S.round++; else { S.screen = 'final-bet'; S.adjust = false; }
       break;
     case 'fshow':
       snap('Visa finalfrågan');
@@ -1507,12 +1589,12 @@ document.addEventListener('click', e => {
       S.scores = S.scores.map((s,i) => s + (S.fres[i] ? S.bets[i] : -S.bets[i]));
       S.rf = S.rf.map((x,i) => [x[0] + (S.fres[i] ? 1 : 0), x[1] + (S.fres[i] ? 0 : 1)]);
       S.screen = 'end'; break;
-    case 'again': snap('Nytt spel'); S = fresh(S.names); S.screen = 'board'; break;
-    case 'nyaspelare': snap('Ändra spelare'); S = fresh(S.names); break;
+    case 'again': snap('Nytt spel'); S = fresh(S.names, antalRundor()); S.screen = 'board'; break;
+    case 'nyaspelare': snap('Ändra spelare'); S = fresh(S.names, antalRundor()); break;
     case 'markold': snap('Markera de första frågorna'); ORIGINAL.forEach(id => D.spelade.add(id)); saveD(); enq('POST', '/spelade', { ids:ORIGINAL }); S.game = buildGame(); break;
     case 'reset':
       if (confirmArm !== 'reset') { arm('reset'); render(); return; }
-      confirmArm = null; snap('Nytt spel'); S = fresh(S.names); break;
+      confirmArm = null; snap('Nytt spel'); S = fresh(S.names, antalRundor()); break;
     default: return;
   }
   commit();
@@ -1521,7 +1603,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', () => { flush(); pull(); });
 
 /* ===================== Start ===================== */
-if (migrerad && S.used[0].length === 0 && S.used[1].length === 0 && (S.screen === 'setup' || S.screen === 'board')) { S.game = buildGame(); saveS(); }
+if (migrerad && S.used.every(u => !u.length) && (S.screen === 'setup' || S.screen === 'board')) { S.game = buildGame(S.game.rounds.length); saveS(); }
 render();
 pull();
 (function swStarta(){
