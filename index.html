@@ -106,7 +106,14 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--brass);color:var(--card-ink)}
 .order{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:560px}
-.orow{display:grid;grid-template-columns:2em minmax(0,1fr) repeat(3,40px);gap:6px;align-items:center}
+.orow{display:grid;grid-template-columns:2em minmax(0,1fr) 54px repeat(3,40px);gap:6px;align-items:center}
+@media (max-width:420px){.orow{grid-template-columns:1.4em minmax(0,1fr) 48px repeat(3,34px);gap:4px}.onr{font-size:17px}}
+.obtn.barnbtn{font-size:13px;letter-spacing:.02em;color:var(--muted)}
+.obtn.barnbtn.on{background:var(--good);border-color:var(--good);color:var(--card-ink)}
+.btag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;background:var(--good);color:var(--card-ink);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}
+.btag.stor{margin-left:0;font-size:12px;padding:2px 8px}
+.barnfinal{border:1px dashed var(--good);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.barnfinal .bq{font-family:var(--f-display);font-size:clamp(20px,3.2vw,28px);margin:0}
 .onr{font-family:var(--f-display);color:var(--brass);font-size:20px;text-align:center}
 .orow input{font:inherit;font-size:17px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--felt);color:var(--ink);width:100%;min-width:0}
 .obtn{height:44px;background:var(--felt);color:var(--ink);border:1px solid var(--line);font-size:18px;font-weight:800;padding:0}
@@ -542,9 +549,69 @@ const FINALS = [
   { cat:'Streaming & serier', q:'Vilket år började Netflix sända i Sverige?', a:'2012', fakta:"Netflix kom till Sverige och övriga Norden i oktober 2012." },
   { cat:'Litteratur', q:'Vilket år gavs den första Harry Potter-boken ut?', a:'1997', fakta:"På engelska hette boken 'Harry Potter and the Philosopher's Stone'." }
 ];
+/* Barnfrågor, 3–6 år. Läses upp av en vuxen; svaren är ett eller två ord. */
+const BARN = [
+  ['Vad säger kon?','Mu'],
+  ['Vad säger hunden?','Voff'],
+  ['Vad säger katten?','Mjau'],
+  ['Vad säger grisen?','Nöff'],
+  ['Vad säger fåret?','Bä'],
+  ['Vilket djur säger kvack?','Ankan'],
+  ['Vilket djur säger kuckeliku?','Tuppen'],
+  ['Vilken färg har en banan?','Gul'],
+  ['Vilken färg har gräset?','Grön'],
+  ['Vilken färg har himlen när solen skiner?','Blå'],
+  ['Vilken färg har en brandbil?','Röd'],
+  ['Vilken färg har snö?','Vit'],
+  ['Vilken färg har en tomat?','Röd'],
+  ['Vilken färg blir det om man blandar blått och gult?','Grönt'],
+  ['Hur många ben har en hund?','Fyra'],
+  ['Hur många fingrar har du på en hand?','Fem'],
+  ['Hur många ögon har du?','Två'],
+  ['Hur många hjul har en cykel?','Två'],
+  ['Hur många dagar har en vecka?','Sju'],
+  ['Vilket djur har en lång snabel?','Elefanten'],
+  ['Vilket djur har en jättelång hals och fläckar?','Giraffen'],
+  ['Vilket djur hoppar och har en ficka på magen?','Kängurun'],
+  ['Vilket djur har taggar på ryggen och bor i skogen?','Igelkotten'],
+  ['Vilket djur kallas djurens kung?','Lejonet'],
+  ['Vilket djur har lång svans och äter bananer?','Apan'],
+  ['Vilket djur gör honung?','Biet'],
+  ['Vilket litet djur bor i en stack i skogen?','Myran'],
+  ['Vilket djur spinner när det är nöjt?','Katten'],
+  ['Vad heter en hundunge?','Valp'],
+  ['Vad heter en hästunge?','Föl'],
+  ['Vad lägger hönan?','Ägg'],
+  ['Vad tycker kaniner om att äta?','Morötter'],
+  ['Var bor fiskarna?','I vattnet'],
+  ['Vilka djur drar tomtens släde?','Renar'],
+  ['Var bor tomten?','På Nordpolen'],
+  ['Vad heter flickan som bor i Villa Villekulla?','Pippi'],
+  ['Vad heter Pippis häst?','Lilla Gubben'],
+  ['Vad heter Pippis apa?','Herr Nilsson'],
+  ['Vad heter Pettsons katt?','Findus'],
+  ['Vad heter Bamses kompis som är en kanin?','Lille Skutt'],
+  ['Vad äter Bamse för att bli stark?','Dunderhonung'],
+  ['Vad heter grisen som är Nalle Puhs kompis?','Nasse'],
+  ['Vem bor i Mumindalen och är vit och rund?','Mumintrollet'],
+  ['Vad heter Emils lillasyster i Lönneberga?','Ida'],
+  ['Vem har en låtsaskompis som heter Mållgan?','Alfons Åberg'],
+  ['Vilken årstid kommer snön?','Vintern'],
+  ['Vad har man på fötterna när det regnar?','Stövlar'],
+  ['Vad har man på huvudet när det är kallt?','Mössa'],
+  ['Vad gör man med en tandborste?','Borstar tänderna'],
+  ['Vad gör man i en säng?','Sover'],
+  ['Vad blir vatten när det fryser?','Is'],
+  ['Vilket fordon flyger i luften?','Flygplanet'],
+  ['Vilken form har en boll?','Rund'],
+  ['Vilket ljus i trafikljuset betyder stopp?','Rött'],
+  ['Vad heter dagen när man fyller år?','Födelsedag'],
+  ['Vad dricker kattungar?','Mjölk'],
+  ['Vilken frukt kan vara röd eller grön och växer på träd?','Äpple']
+];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 const APP_ID = 'com.mawe.fragekampen';
 /* Omgång 1 ger 100–500, omgång 2 200–1000, omgång 3 300–1500 osv. */
 const MAX_RUNDOR = 4;
@@ -559,6 +626,10 @@ const halva = p => Math.round(p / 2 / 50) * 50 || 50;
 /* Svensk genitiv: Annas, men Markus och Max utan extra s. */
 const genitiv = n => /[sxz]$/i.test(n) ? n : n + 's';
 const jokerKvar = i => regler().joker && !(S.jokerAnv || [])[i];
+/* Barnläge: S.barn ligger i samma ordning som S.names. */
+const arBarn = i => !!(S.barn || [])[i];
+const BARNKAT = 'Barnfrågor';
+const arBarnKat = k => norm(k) === norm(BARNKAT);
 /* "Spelare 3" är bara en platshållare, inget riktigt namn. */
 const ararNamn = n => !n || /^Spelare \d+$/.test(n);
 const nollor = (n, v) => Array.from({ length:n }, () => (typeof v === 'function' ? v() : v));
@@ -594,6 +665,9 @@ BANK.forEach((c, ci) => c.q.forEach((x, qi) => {
   LEG[ci + '-' + qi] = id;
   INBYGGDA.push({ id, kat:c.t, niva:x[0], q:x[1], a:x[2], fakta:x[3] || '' });
 }));
+/* Barnfrågor (3–6 år) kommer aldrig upp på spelplanen. De ersätter frågan i
+   rutan när det är ett barns tur att svara. */
+const BARNINB = BARN.map(x => ({ id:'k-' + hash(x[0]), kat:BARNKAT, niva:1, q:x[0], a:x[1], fakta:x[2] || '' }));
 const FINALER = FINALS.map((f, i) => { const id = 'f-' + hash(f.q); LEG['f-' + i] = id; return { id, kat:f.cat, q:f.q, a:f.a, fakta:f.fakta || '' }; });
 /* De 60 frågorna + finalen som fanns i version 1.0 och 1.1, innan frågebanken kom */
 const ORIGINAL = [...Array(12).keys()].flatMap(c => [0,2,4,6,8].map(i => LEG[c+'-'+i])).concat(LEG['f-0']);
@@ -619,7 +693,7 @@ let migrerad = false;
 /* Faktan slås upp på frågans id, så den följer med även i spel som startats
    innan faktan fanns. */
 function faktaFor(id){
-  const f = INBYGGDA.find(x => x.id === id) || FINALER.find(x => x.id === id) || D.egna.find(x => x.id === id);
+  const f = INBYGGDA.find(x => x.id === id) || BARNINB.find(x => x.id === id) || FINALER.find(x => x.id === id) || D.egna.find(x => x.id === id);
   return (f && f.fakta) || '';
 }
 function googleHTML(q, a){
@@ -632,7 +706,19 @@ function svarHTML(q, a, id){
     ${f ? `<p class="fakta"><b>Visste du?</b> ${esc(f)}</p>` : ''}
     <p class="glink">${googleHTML(q, a)}</p></div>`;
 }
-function pool(){ return INBYGGDA.concat(D.egna).filter(f => !D.slangda.has(f.id)); }
+function pool(){ return INBYGGDA.concat(D.egna.filter(f => !arBarnKat(f.kat))).filter(f => !D.slangda.has(f.id)); }
+function barnPool(){ return BARNINB.concat(D.egna.filter(f => arBarnKat(f.kat))).filter(f => !D.slangda.has(f.id)); }
+const barnOspelade = () => barnPool().filter(f => !D.spelade.has(f.id)).length;
+/* En ospelad barnfråga. När alla är spelade får de komma igen, men aldrig två
+   gånger i samma spel om det går att undvika. */
+function valjBarn(utom){
+  const u = new Set(utom || []);
+  (S.barnAnv || []).forEach(id => u.add(id));
+  if (S.open && S.open.barn) u.add(S.open.barn.id);
+  const alla = barnPool(), fri = alla.filter(f => !u.has(f.id));
+  const f = shuffle(fri.filter(f => !D.spelade.has(f.id)))[0] || shuffle(fri)[0] || shuffle(alla)[0];
+  return f ? { id:f.id, q:f.q, a:f.a } : null;
+}
 function kategorier(){
   const m = new Map();
   for (const f of pool()) {
@@ -665,7 +751,8 @@ function buildGame(antal){
   const maxKl = Math.round(nK * MAX_KLASSISKA / 12);
   let recycled = false;
   if (ospeladeTotalt() < nK * 5) {
-    const behall = [...D.spelade].filter(id => id.startsWith('f-'));
+    const barnId = new Set(barnPool().map(f => f.id));
+    const behall = [...D.spelade].filter(id => id.startsWith('f-') || barnId.has(id));
     D.spelade = new Set(behall); saveD(); recycled = true;
     enq('POST', '/nollstall', { vad:'spelade', behall });
   }
@@ -705,12 +792,20 @@ function pickDoubles(){
 }
 /* Hur många omgångar som går: varje omgång behöver sex kategorier med minst fem frågor. */
 const maxRundor = () => Math.max(1, Math.min(MAX_RUNDOR, Math.floor(kategorier().filter(k => k.fr.length >= 5).length / 6)));
-function fresh(names, rundor){
+const barnNamn = () => new Set(lsGet('fk-barnnamn', []) || []);
+function minnsBarn(){
+  const s = barnNamn();
+  S.names.forEach((n,i) => { if (ararNamn(n)) return; if (arBarn(i)) s.add(norm(n)); else s.delete(norm(n)); });
+  lsSet('fk-barnnamn', [...s]);
+}
+function fresh(names, rundor, barn){
   const nm = (names || (D.spelare.length >= MIN_SPELARE ? D.spelare : DEF)).slice(0, MAX_SPELARE), n = nm.length;
+  const bn = barnNamn();
   const nR = Math.min(maxRundor(), rundor || lsGet('fk-rundor', 2) || 2);
   return { v:3, id:uid(), t:0, game:buildGame(nR), screen:'setup', names:nm, scores:nollor(n, 0),
     rf:nollor(n, () => [0,0]), turn:0, round:0, used:nollor(nR, () => []), dbl:nollor(nR, pickDoubles), open:null,
-    bets:nollor(n, 0), fres:nollor(n, null), adjust:false };
+    bets:nollor(n, 0), fres:nollor(n, null), adjust:false,
+    barn:nm.map((x,i) => barn ? !!barn[i] : (!ararNamn(x) && bn.has(norm(x)))), barnAnv:[] };
 }
 function migreraSpel(g){
   /* Ett pågående spel från version 1.2–1.3 får nya id och de fält som saknas. */
@@ -858,7 +953,7 @@ async function pull(){
   saveD();
   /* Ett spel som fortsatt på en annan enhet tas över. */
   if (d.spel && d.spel.v === 3 && (d.spelT || 0) > (S.t || 0)) { S = d.spel; saveS(); UNDO = []; lsSet('fk-angra', UNDO); toast('Spelet hämtades från Homey'); }
-  else if (S.screen === 'setup' && D.spelare.length >= MIN_SPELARE && S.names.every(ararNamn)) { S.names = D.spelare.slice(0, MAX_SPELARE); saveS(); }
+  else if (S.screen === 'setup' && D.spelare.length >= MIN_SPELARE && S.names.every(ararNamn)) { S.names = D.spelare.slice(0, MAX_SPELARE); const bn = barnNamn(); S.barn = S.names.map(n => bn.has(norm(n))); saveS(); }
   sattStatus('ok');
   render(true);
   flush();
@@ -919,7 +1014,8 @@ async function geminiNycklar(){
   if (egen) ut.push(egen);
   return ut;
 }
-function tolkaFragor(text){
+function tolkaFragor(text, std){
+  std = std || {};
   let j = null;
   try { j = JSON.parse(text); } catch(e) {
     const a = text.indexOf('['), b = text.lastIndexOf(']');
@@ -928,8 +1024,8 @@ function tolkaFragor(text){
   if (j && !Array.isArray(j) && Array.isArray(j.fragor)) j = j.fragor;
   if (!Array.isArray(j)) return [];
   return j.map(x => ({
-    kat: String(x.kategori || x.kat || '').trim(),
-    niva: Math.round(Number(x.niva ?? x['nivå'] ?? x.level)),
+    kat: String(x.kategori || x.kat || std.kat || '').trim(),
+    niva: Math.round(Number(x.niva ?? x['nivå'] ?? x.level ?? std.niva)),
     q: String(x.fraga || x['fråga'] || x.question || '').trim(),
     a: String(x.svar || x.answer || '').trim(),
     fakta: String(x.fakta || x.funfact || x.fact || '').trim()
@@ -939,6 +1035,19 @@ function tolkaFragor(text){
    kategori har 10). Flest saknade först. */
 function lagaKategorier(){
   return kategorier().filter(k => ospelade(k) < 10).sort((a,b) => ospelade(a) - ospelade(b) || a.t.localeCompare(b.t, 'sv'));
+}
+function byggBarnPrompt(antal){
+  const finns = shuffle(barnPool().map(f => f.q)).slice(0, 150);
+  return [
+    `Skriv ${antal} frågor på svenska till barn som är 3–6 år gamla. En vuxen läser upp frågan högt och barnet svarar muntligt.`,
+    'Frågorna ska vara mycket enkla och korta, en mening. Svaret ska vara ett eller två ord som ett litet barn kan säga.',
+    'Ämnen: djur och vad de säger, färger, former, kroppen, mat och frukt, årstider och väder, fordon, vardag hemma och på förskolan, siffror upp till 10, kända svenska barnfigurer (Pippi, Alfons, Pettson och Findus, Bamse, Babblarna, Emil med flera) och enkla sagor.',
+    'Inget skrämmande, inget våldsamt, inga lurfrågor, inga flervalsfrågor och inga frågor som kräver att barnet kan läsa eller klockan.',
+    'Varje fråga ska ha ett entydigt svar som en vuxen lätt kan bedöma.',
+    'Till varje fråga: en kort och sann fakta som en vuxen kan berätta för barnet (en mening, högst 100 tecken, enkla ord).',
+    finns.length ? 'Dessa frågor finns redan och får inte upprepas eller omformuleras:\n- ' + finns.join('\n- ') : '',
+    'Svara ENBART med en JSON-lista: [{"kategori":"Barnfrågor","niva":1,"fraga":"...","svar":"...","fakta":"..."}]'
+  ].filter(Boolean).join('\n\n');
 }
 function byggPrompt(kat, antal, mal){
   const allaKat = kategorier().map(k => k.t);
@@ -968,7 +1077,8 @@ async function genereraFragor(kat, antal, mal){
     const nycklar = await geminiNycklar();
     if (!nycklar.length) throw new Error('Ingen Gemini-nyckel. Anslut Homey (Logic-variabeln gemini_api_key) eller klistra in en nyckel nedan.');
     GEN.text = 'Skriver frågor… det tar ofta 10–30 sekunder.'; render(true);
-    const prompt = byggPrompt(kat, antal, mal);
+    const barn = arBarnKat(kat);
+    const prompt = barn ? byggBarnPrompt(antal) : byggPrompt(kat, antal, mal);
     let text = null, sistFel = '';
     ute: for (const nyckel of nycklar) for (const modell of GEMINI_MODELLER) {
       try {
@@ -982,11 +1092,12 @@ async function genereraFragor(kat, antal, mal){
       } catch(e) { sistFel = modell + ': ' + (e.message || 'nätverksfel'); }
     }
     if (!text) throw new Error('Gemini svarade inte (' + sistFel + ').');
-    const kanda = new Set(pool().map(f => f.id.slice(2)).concat([...D.slangda].map(id => id.slice(2))));
+    const kanda = new Set(pool().concat(barnPool()).map(f => f.id.slice(2)).concat([...D.slangda].map(id => id.slice(2))));
     const nya = [];
-    for (const f of tolkaFragor(text)) {
+    for (const f of tolkaFragor(text, barn ? { kat:BARNKAT, niva:1 } : null)) {
       const h = hash(f.q); if (kanda.has(h)) continue; kanda.add(h);
-      if (kat) f.kat = kat;
+      if (barn) { f.kat = BARNKAT; f.niva = 1; }
+      else if (kat) f.kat = kat;
       const befintlig = kategorier().find(k => norm(k.t) === norm(f.kat));
       if (befintlig) f.kat = befintlig.t;
       nya.push(Object.assign({ id:'e-' + h, at:Date.now() }, f));
@@ -1049,7 +1160,7 @@ function seatsHTML(highlight){
   return `<section class="seats" aria-label="Poängställning">${S.names.map((n,i)=>`
     <div class="seat${highlight && i===ans() ? ' active' : ''}${highlight && i===S.turn ? ' asking' : ''}">
       <span class="lbl">${!highlight ? '' : i===S.turn ? 'Frågar' : i===ans() ? 'Svarar' : ''}</span>
-      <span class="nm">${esc(n)}</span>
+      <span class="nm">${esc(n)}${arBarn(i) ? '<small class="btag">Barn</small>' : ''}</span>
       <span class="sc${S.scores[i]<0?' neg':''}">${S.scores[i]}${highlight && regler().joker ? `<span class="jchip${jokerKvar(i) ? '' : ' slut'}" title="${jokerKvar(i) ? 'Jokern finns kvar' : 'Jokern är använd'}">J</span>` : ''}</span>
       ${S.adjust ? `<div class="adj"><button data-act="adj" data-p="${i}" data-d="-100">−100</button><button data-act="adj" data-p="${i}" data-d="100">+100</button></div>` : ''}
     </div>`).join('')}</section>`;
@@ -1059,10 +1170,11 @@ function setupHTML(){
   const egna = D.egna.filter(f => !D.slangda.has(f.id)).length;
   return `<section class="panel">
     <h2>Vilka sitter vid bordet?</h2>
-    <p class="note">Skriv in spelarna i den ordning ni sitter. Den som står efter dig svarar på dina frågor.</p>
+    <p class="note">Skriv in spelarna i den ordning ni sitter. Den som står efter dig svarar på dina frågor. Tryck <b>Barn</b> för barn i åldern 3–6 år.</p>
     <ol class="order">${S.names.map((n,i)=>`<li class="orow">
       <label class="onr" for="p${i}">${i+1}</label>
       <input id="p${i}" value="${ararNamn(n) ? '' : esc(n)}" placeholder="Spelare ${i+1}" maxlength="18" autocomplete="off" list="kanda">
+      <button class="obtn barnbtn${arBarn(i) ? ' on' : ''}" data-act="pbarn" data-p="${i}" aria-pressed="${arBarn(i)}" title="Barn 3–6 år får barnfrågor">Barn</button>
       <button class="obtn" data-act="pupp" data-p="${i}" ${i===0?'disabled':''} aria-label="Flytta upp ${esc(n)}">↑</button>
       <button class="obtn" data-act="pned" data-p="${i}" ${i===S.names.length-1?'disabled':''} aria-label="Flytta ned ${esc(n)}">↓</button>
       <button class="obtn" data-act="pbort" data-p="${i}" ${S.names.length<=MIN_SPELARE?'disabled':''} aria-label="Ta bort ${esc(n)}">✕</button>
@@ -1083,6 +1195,8 @@ function setupHTML(){
       <li>Varje ny omgång ger högre värden: 100–500, sedan 200–1000 och så vidare. I <b>finalen</b> svarar alla och satsar poäng innan frågan visas. Fel svar kostar insatsen.</li>
       ${regler().stold ? '<li><b>Stöld:</b> svarar någon fel får nästa runt bordet försöka för halva poängen (minst tre spelare).</li>' : ''}
       ${regler().joker ? '<li><b>Joker:</b> varje spelare har en joker per spel – byt fråga eller fråga bordet om hjälp. Ett J vid poängen visar att den finns kvar.</li>' : ''}
+      ${S.names.some((n,i) => arBarn(i)) ? (() => { const bn = S.names.filter((n,i) => arBarn(i) && !ararNamn(n));
+        return `<li><b>Barn:</b> när det är ${bn.length ? esc(genitiv(bn.join(' och '))) : 'ett barns'} tur kommer en enkel barnfråga i stället, värd lika mycket som rutan. Barnfrågor kan inte stjälas, och barn får en egen finalfråga.</li>`; })() : ''}
       <li>Tryckte någon fel? <b>Ångra</b> uppe bland knapparna tar tillbaka senaste trycket.</li>
     </ul>
     <p class="note">Frågebanken: <b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade${egna ? `, varav ${egna} egna` : ''}. Varje spel drar ${antalRundor() * 30} nya.${S.game.recycled ? ' Alla frågor hade använts, så banken har börjat om.' : ''}</p>
@@ -1125,18 +1239,27 @@ function finalQHTML(){
   return `<section class="panel">
     <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
     <p class="bigq">${esc(S.game.final.q)}</p>
+    ${barnFinalHTML(false)}
     ${timerHTML()}
-    <div class="row"><button class="cta" data-act="freveal">Visa svaret</button><button class="ghost" data-act="nyfinal">Redan fått – ny fråga</button></div>
+    <div class="row"><button class="cta" data-act="freveal">Visa svaret</button><button class="ghost" data-act="nyfinal">Redan fått – ny fråga</button>${S.finalBarn ? '<button class="ghost" data-act="nybarnfinal">Ny barnfråga</button>' : ''}</div>
   </section>`;
 }
 
+/* Barnen svarar på en egen finalfråga. */
+function barnFinalHTML(svar){
+  const b = S.finalBarn; if (!b) return '';
+  const vem = S.names.filter((n,i) => arBarn(i)).join(', ');
+  return `<div class="barnfinal"><p class="who"><span class="btag stor">Barnfråga</span> till ${esc(vem)}</p>
+    <p class="bq">${esc(b.q)}</p>${svar ? svarHTML(b.q, b.a, b.id) : ''}</div>`;
+}
 function finalJudgeHTML(){
   const ready = S.fres.every(x => x !== null);
   return `<section class="panel">
     <h2>Finalfrågan · ${esc(S.game.final.cat)}</h2>
     <p class="bigq">${esc(S.game.final.q)}</p>
     ${svarHTML(S.game.final.q, S.game.final.a, S.game.final.id)}
-    <div class="judge">${S.names.map((n,i)=>`<div class="jrow"><span>${esc(n)} · ${S.bets[i]}</span>
+    ${barnFinalHTML(true)}
+    <div class="judge">${S.names.map((n,i)=>`<div class="jrow"><span>${esc(n)}${arBarn(i) && S.finalBarn ? '<small class="btag">Barn</small>' : ''} · ${S.bets[i]}</span>
       <div class="tog"><button class="${S.fres[i]===true?'on y':''}" data-act="fres" data-p="${i}" data-v="1">Rätt</button>
       <button class="${S.fres[i]===false?'on n':''}" data-act="fres" data-p="${i}" data-v="0">Fel</button></div></div>`).join('')}</div>
     <div class="row"><button class="cta" data-act="fscore" ${ready?'':'disabled'}>Räkna ihop</button></div>
@@ -1183,8 +1306,8 @@ function bytKategori(c, namn){
 }
 function modalHTML(){
   const o = S.open; if (!o) return '';
-  const R = curRound(), cat = R.cats[o.c], [q,a,id,egenKat] = cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
-  const meta = `<div class="qmeta"><span>${esc(egenKat || cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
+  const R = curRound(), cat = R.cats[o.c], [q,a,id,egenKat] = o.barn ? [o.barn.q, o.barn.a, o.barn.id, 'Barnfråga'] : cat.q[o.r], v = val(o.r), dbl = isDbl(o.c,o.r), who = esc(S.names[ans()]), asker = esc(S.names[S.turn]), pts = dbl ? v*2 : v;
+  const meta = `<div class="qmeta"><span>${o.barn ? '<span class="btag stor">Barnfråga</span>' : esc(egenKat || cat.t)}</span><span>${dbl ? 'Dubbel · '+pts : pts} poäng</span></div>
     <p class="who">${asker} läser upp för ${who}</p>
     ${o.bordet ? `<p class="jokerinfo">Joker: ${who} får ta hjälp av bordet</p>` : ''}`;
   let body;
@@ -1236,16 +1359,17 @@ function statsHTML(){
 /* ----- Frågebanken ----- */
 function bankHTML(){
   const kats = kategorier().sort((a,b) => a.t.localeCompare(b.t, 'sv'));
-  const egna = D.egna.filter(f => !D.slangda.has(f.id)).length;
+  const egna = D.egna.filter(f => !D.slangda.has(f.id) && !arBarnKat(f.kat)).length;
   const harEgenNyckel = !!lsGet('fk-gemini', '');
   return `<section class="panel"><h2>Frågebanken</h2>
     <p class="note"><b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade · ${INBYGGDA.length} inbyggda, ${egna} egna · ${D.slangda.size} slängda · ${kats.length} kategorier</p>
+    <p class="note">Barnfrågor (3–6 år): <b>${barnOspelade()}</b> av ${barnPool().length} ospelade. Välj Barnfrågor nedan för att skapa fler.</p>
     <div class="split">
       <div class="panel" style="padding:16px;gap:12px">
         <h3>Skapa fler frågor</h3>
         <div class="fields">
           <label class="field" for="gen-kat">Kategori
-            <select id="gen-kat"><option value="">Blandat – fyll på befintliga</option>${kats.map(k => `<option value="${esc(k.t)}">${esc(k.t)}</option>`).join('')}</select></label>
+            <select id="gen-kat"><option value="">Blandat – fyll på befintliga</option><option value="${BARNKAT}">${BARNKAT} (3–6 år)</option>${kats.map(k => `<option value="${esc(k.t)}">${esc(k.t)}</option>`).join('')}</select></label>
           <label class="field" for="gen-ny">Eller en ny kategori<input id="gen-ny" maxlength="30" autocomplete="off" placeholder="t.ex. Göteborg"></label>
           <label class="field" for="gen-antal">Antal
             <select id="gen-antal"><option>10</option><option selected>20</option><option>30</option></select></label>
@@ -1469,15 +1593,19 @@ document.addEventListener('click', e => {
       lasNamn(); lsSet('fk-rundor', n);
       S.game = buildGame(n); S.round = 0; S.used = nollor(n, () => []); S.dbl = nollor(n, pickDoubles);
       saveS(); render(); return; }
-    case 'pupp': case 'pned': case 'pbort': case 'pny': case 'pblanda': {
+    case 'pupp': case 'pned': case 'pbort': case 'pny': case 'pblanda': case 'pbarn': {
       if (S.screen !== 'setup') return;
       lasNamn();
-      const nm = S.names;
+      /* Namn och barnmarkering flyttas ihop. */
+      const nm = S.names.map((n,i) => ({ n, b:arBarn(i) }));
       if (act === 'pupp' && p > 0) [nm[p-1], nm[p]] = [nm[p], nm[p-1]];
       if (act === 'pned' && p < nm.length-1) [nm[p+1], nm[p]] = [nm[p], nm[p+1]];
       if (act === 'pbort' && nm.length > MIN_SPELARE) nm.splice(p, 1);
-      if (act === 'pny' && nm.length < MAX_SPELARE) nm.push('');
+      if (act === 'pny' && nm.length < MAX_SPELARE) nm.push({ n:'', b:false });
       if (act === 'pblanda') shuffle(nm);
+      if (act === 'pbarn') nm[p].b = !nm[p].b;
+      S.names = nm.map(x => x.n); S.barn = nm.map(x => x.b);
+      if (act === 'pbarn') minnsBarn();
       const fokus = act === 'pny' ? 'p' + (nm.length-1) : (act === 'pupp' || act === 'pned') ? 'p' + (act === 'pupp' ? p-1 : p+1) : null;
       saveS(); render();
       if (fokus) { const f = document.getElementById(fokus); if (f) f.focus(); }
@@ -1490,13 +1618,16 @@ document.addEventListener('click', e => {
       snap('Starta spelet');
       lasNamn();
       S.names = S.names.map((n,i) => (ararNamn(n) ? 'Spelare ' + (i+1) : n));
-      { const n = S.names.length; S.scores = nollor(n, 0); S.rf = nollor(n, () => [0,0]); S.bets = nollor(n, 0); S.fres = nollor(n, null); S.turn = 0; S.jokerAnv = nollor(n, false); }
+      { const n = S.names.length; S.scores = nollor(n, 0); S.rf = nollor(n, () => [0,0]); S.bets = nollor(n, 0); S.fres = nollor(n, null); S.turn = 0; S.jokerAnv = nollor(n, false);
+        S.barn = S.names.map((x,i) => arBarn(i)); S.barnAnv = []; S.finalBarn = null; }
+      minnsBarn();
       D.spelare = S.names.slice(); saveD(); enq('PUT', '/spelare', { namn:S.names }, 'spelare');
       S.screen = 'board'; break; }
     case 'cell': {
       const c = +el.dataset.c, r = +el.dataset.r;
       snap(`Öppnade ${curRound().cats[c].t} ${val(r)}`);
       S.open = { c, r, phase: isDbl(c,r) ? 'dbl' : 'q' };
+      if (arBarn(ans())) S.open.barn = valjBarn();
       S.game.recycled = false; break; }
     case 'dblgo': snap('Visa frågan'); S.open.phase = 'q'; break;
     case 'reveal': snap('Visa svaret'); S.open.phase = 'a'; break;
@@ -1505,9 +1636,11 @@ document.addEventListener('click', e => {
       snap(ratt ? `Rätt, +${pts} till ${S.names[vem]}` : `Fel för ${S.names[vem]}`);
       if (ratt) S.scores[vem] += pts;
       S.rf[vem][ratt ? 0 : 1]++;
-      markeraSpelad(curRound().cats[o.c].q[o.r][2]);
-      /* Fel och stöld påslagen: nästa runt bordet får chansen innan frågan stängs. */
-      if (!ratt && stoldGar()) { o.phase = 'stold'; break; }
+      if (o.barn) { markeraSpelad(o.barn.id); S.barnAnv = (S.barnAnv || []).concat(o.barn.id); }
+      else markeraSpelad(curRound().cats[o.c].q[o.r][2]);
+      /* Fel och stöld påslagen: nästa runt bordet får chansen innan frågan stängs.
+         Barnfrågor stjäls inte, och barn stjäl inte vuxnas frågor. */
+      if (!ratt && stoldGar() && !o.barn && !arBarn(tjuv())) { o.phase = 'stold'; break; }
       S.turn = vem; closeQ(); break; }
     case 'stold': {
       const o = S.open, pts = val(o.r) * (isDbl(o.c,o.r) ? 2 : 1), h = halva(pts), t = tjuv(), ratt = el.dataset.v === '1';
@@ -1517,7 +1650,13 @@ document.addEventListener('click', e => {
     case 'joker': {
       const o = S.open, vem = ans();
       if (!jokerKvar(vem)) return;
-      if (el.dataset.typ === 'byt') {
+      if (el.dataset.typ === 'byt' && o.barn) {
+        const b = valjBarn();
+        if (!b) { toast('Det finns inga fler barnfrågor att byta till.'); return; }
+        snap(`Joker: ${S.names[vem]} bytte fråga`);
+        markeraSpelad(o.barn.id); S.barnAnv = (S.barnAnv || []).concat(o.barn.id);
+        o.barn = b; nyTimer = true;
+      } else if (el.dataset.typ === 'byt') {
         const kat = curRound().cats[o.c], gammal = kat.q[o.r];
         const f = ersattning(kat.t, o.r + 1, idnISpelet());
         if (!f) { toast('Det finns inga ospelade frågor kvar att byta till.'); return; }
@@ -1546,6 +1685,14 @@ document.addEventListener('click', e => {
       if (!bytKategori(c, namn)) { UNDO.pop(); lsSet('fk-angra', UNDO); return; }
       toast(`${fran} är utbytt mot ${namn}`); break; }
     case 'nyfraga': {
+      if (S.open.barn) {
+        const o = S.open, b = valjBarn();
+        if (!b) { toast('Det finns inga fler barnfrågor. Skapa fler i Frågebanken.'); return; }
+        snap('Ny barnfråga i stället för: ' + o.barn.q);
+        markeraSpelad(o.barn.id); S.barnAnv = (S.barnAnv || []).concat(o.barn.id);
+        o.barn = b; o.phase = 'q'; nyTimer = true;
+        toast('Ny barnfråga'); break;
+      }
       const o = S.open, kat = curRound().cats[o.c], gammal = kat.q[o.r];
       const f = ersattning(kat.t, o.r + 1, idnISpelet());
       if (!f) { toast('Det finns inga ospelade frågor kvar. Skapa fler i Frågebanken.'); return; }
@@ -1581,20 +1728,26 @@ document.addEventListener('click', e => {
         const mx = Math.max(S.scores[i], 500), v = Math.round(+document.getElementById('bet'+i).value || 0);
         return Math.min(Math.max(v, 0), mx);
       });
-      S.fres = nollor(S.names.length, null); S.screen = 'final-q'; break;
-    case 'freveal': snap('Visa finalsvaret'); S.screen = 'final-judge'; markeraSpelad(S.game.final.id); break;
+      S.fres = nollor(S.names.length, null); S.screen = 'final-q';
+      S.finalBarn = S.names.some((n,i) => arBarn(i)) ? valjBarn() : null; break;
+    case 'nybarnfinal': {
+      const gammal = S.finalBarn, b = gammal && valjBarn([gammal.id]);
+      if (!b) { toast('Det finns inga fler barnfrågor.'); return; }
+      snap('Ny barnfråga i finalen'); markeraSpelad(gammal.id); S.barnAnv = (S.barnAnv || []).concat(gammal.id);
+      S.finalBarn = b; break; }
+    case 'freveal': snap('Visa finalsvaret'); S.screen = 'final-judge'; markeraSpelad(S.game.final.id); if (S.finalBarn) markeraSpelad(S.finalBarn.id); break;
     case 'fres': snap(`${S.names[p]} ${el.dataset.v === '1' ? 'rätt' : 'fel'} i finalen`); S.fres[p] = el.dataset.v === '1'; break;
     case 'fscore':
       snap('Räkna ihop');
       S.scores = S.scores.map((s,i) => s + (S.fres[i] ? S.bets[i] : -S.bets[i]));
       S.rf = S.rf.map((x,i) => [x[0] + (S.fres[i] ? 1 : 0), x[1] + (S.fres[i] ? 0 : 1)]);
       S.screen = 'end'; break;
-    case 'again': snap('Nytt spel'); S = fresh(S.names, antalRundor()); S.screen = 'board'; break;
-    case 'nyaspelare': snap('Ändra spelare'); S = fresh(S.names, antalRundor()); break;
+    case 'again': snap('Nytt spel'); S = fresh(S.names, antalRundor(), S.barn); S.screen = 'board'; break;
+    case 'nyaspelare': snap('Ändra spelare'); S = fresh(S.names, antalRundor(), S.barn); break;
     case 'markold': snap('Markera de första frågorna'); ORIGINAL.forEach(id => D.spelade.add(id)); saveD(); enq('POST', '/spelade', { ids:ORIGINAL }); S.game = buildGame(); break;
     case 'reset':
       if (confirmArm !== 'reset') { arm('reset'); render(); return; }
-      confirmArm = null; snap('Nytt spel'); S = fresh(S.names, antalRundor()); break;
+      confirmArm = null; snap('Nytt spel'); S = fresh(S.names, antalRundor(), S.barn); break;
     default: return;
   }
   commit();
