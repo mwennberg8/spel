@@ -551,7 +551,7 @@ const FINALS = [
   { cat:'Litteratur', q:'Vilket år gavs den första Harry Potter-boken ut?', a:'1997', fakta:"På engelska hette boken 'Harry Potter and the Philosopher's Stone'." }
 ];
 /* Barnfrågor, 3–6 år. Läses upp av en vuxen; svaren är ett eller två ord. */
-/* [fråga, svar, tema]. Temat är en kategori på spelplanen; utan tema passar frågan överallt. */
+/* [fråga, svar, kategori]. Varje kategori på spelplanen har minst fem barnfrågor. */
 const BARN = [
   ['Vad säger kon?','Mu','Djur'],
   ['Vad säger hunden?','Voff','Djur'],
@@ -563,7 +563,7 @@ const BARN = [
   ['Vilken färg har en banan?','Gul','Mat & dryck'],
   ['Vilken färg har gräset?','Grön','Natur & vetenskap'],
   ['Vilken färg har himlen när solen skiner?','Blå','Natur & vetenskap'],
-  ['Vilken färg har en brandbil?','Röd'],
+  ['Vilken färg har en brandbil?','Röd','Blandat'],
   ['Vilken färg har snö?','Vit','Natur & vetenskap'],
   ['Vilken färg har en tomat?','Röd','Mat & dryck'],
   ['Vilken färg blir det om man blandar blått och gult?','Grönt','Natur & vetenskap'],
@@ -571,7 +571,7 @@ const BARN = [
   ['Hur många fingrar har du på en hand?','Fem','Kroppen'],
   ['Hur många ögon har du?','Två','Kroppen'],
   ['Hur många hjul har en cykel?','Två','Teknik & prylar'],
-  ['Hur många dagar har en vecka?','Sju'],
+  ['Hur många dagar har en vecka?','Sju','Blandat'],
   ['Vilket djur har en lång snabel?','Elefanten','Djur'],
   ['Vilket djur har en jättelång hals och fläckar?','Giraffen','Djur'],
   ['Vilket djur hoppar och har en ficka på magen?','Kängurun','Djur'],
@@ -586,8 +586,8 @@ const BARN = [
   ['Vad lägger hönan?','Ägg','Djur'],
   ['Vad tycker kaniner om att äta?','Morötter','Djur'],
   ['Var bor fiskarna?','I vattnet','Djur'],
-  ['Vilka djur drar tomtens släde?','Renar'],
-  ['Var bor tomten?','På Nordpolen'],
+  ['Vilka djur drar tomtens släde?','Renar','Djur'],
+  ['Var bor tomten?','På Nordpolen','Blandat'],
   ['Vad heter flickan som bor i Villa Villekulla?','Pippi','Litteratur'],
   ['Vad heter Pippis häst?','Lilla Gubben','Litteratur'],
   ['Vad heter Pippis apa?','Herr Nilsson','Litteratur'],
@@ -599,21 +599,121 @@ const BARN = [
   ['Vad heter Emils lillasyster i Lönneberga?','Ida','Litteratur'],
   ['Vem har en låtsaskompis som heter Mållgan?','Alfons Åberg','Litteratur'],
   ['Vilken årstid kommer snön?','Vintern','Natur & vetenskap'],
-  ['Vad har man på fötterna när det regnar?','Stövlar'],
-  ['Vad har man på huvudet när det är kallt?','Mössa'],
+  ['Vad har man på fötterna när det regnar?','Stövlar','Blandat'],
+  ['Vad har man på huvudet när det är kallt?','Mössa','Blandat'],
   ['Vad gör man med en tandborste?','Borstar tänderna','Kroppen'],
-  ['Vad gör man i en säng?','Sover'],
+  ['Vad gör man i en säng?','Sover','Blandat'],
   ['Vad blir vatten när det fryser?','Is','Natur & vetenskap'],
   ['Vilket fordon flyger i luften?','Flygplanet','Teknik & prylar'],
-  ['Vilken form har en boll?','Rund'],
-  ['Vilket ljus i trafikljuset betyder stopp?','Rött'],
-  ['Vad heter dagen när man fyller år?','Födelsedag'],
+  ['Vilken form har en boll?','Rund','Blandat'],
+  ['Vilket ljus i trafikljuset betyder stopp?','Rött','Vardagsteknik'],
+  ['Vad heter dagen när man fyller år?','Födelsedag','Blandat'],
   ['Vad dricker kattungar?','Mjölk','Djur'],
-  ['Vilken frukt kan vara röd eller grön och växer på träd?','Äpple','Mat & dryck']
+  ['Vilken frukt kan vara röd eller grön och växer på träd?','Äpple','Mat & dryck'],
+  ['Vilka färger har Sveriges flagga?','Blått och gult','Sverige runt'],
+  ['Vad heter den röda trähästen från Dalarna?','Dalahäst','Sverige runt'],
+  ['Vad dansar man runt på midsommar?','Midsommarstången','Sverige runt'],
+  ['Vilket stort djur kallas skogens konung?','Älgen','Sverige runt'],
+  ['Vilka röda bär äter man ofta på midsommar?','Jordgubbar','Sverige runt'],
+  ['Vilken färg har smurfarna?','Blå','80-talet'],
+  ['Vilken färg har Pac-Man?','Gul','80-talet'],
+  ['Vad heter rörmokaren med röd keps och mustasch i tv-spelen?','Mario','80-talet'],
+  ['Vad heter flickan som är dotter till rövarhövdingen Mattis?','Ronja','80-talet'],
+  ['Vilket djur är Pelle Svanslös?','Katt','80-talet'],
+  ['Vilken gul Pokémon säger pika pika?','Pikachu','90-talet'],
+  ['Vad heter cowboyen i Toy Story?','Woody','90-talet'],
+  ['Vad heter rymdmannen i Toy Story?','Buzz','90-talet'],
+  ['Vad heter lejonungen i Lejonkungen?','Simba','90-talet'],
+  ['Vilket djur är Mamma Mu?','Ko','90-talet'],
+  ['Vilken färg har trollet Shrek?','Grön','2000-talet'],
+  ['Vilken sorts fisk är Nemo?','Clownfisk','2000-talet'],
+  ['Vad heter den röda racerbilen i filmen Bilar?','Blixten McQueen','2000-talet'],
+  ['Vilket djur är Manny i Ice Age?','Mammut','2000-talet'],
+  ['Vad heter grisen som har en lillebror som heter George?','Greta Gris','2000-talet'],
+  ['Vad heter snögubben i Frost?','Olof','2010-talet'],
+  ['Vad heter Elsas lillasyster i Frost?','Anna','2010-talet'],
+  ['Vilken färg har minionerna?','Gula','2010-talet'],
+  ['Vilket djur är Bluey?','Hund','2010-talet'],
+  ['Vad heter hundvalparna som räddar folk tillsammans med Ryder?','Paw Patrol','2010-talet'],
+  ['Vad heter brandmannen i den tecknade serien som utspelar sig i Pontypandy?','Brandman Sam','Streaming & serier'],
+  ['Vilken färg har tåget Thomas?','Blå','Streaming & serier'],
+  ['Vad heter Musse Piggs hund?','Pluto','Streaming & serier'],
+  ['Vad heter Musse Piggs flickvän?','Mimmi','Streaming & serier'],
+  ['Vad heter Blueys lillasyster?','Bingo','Streaming & serier'],
+  ['Vilket djur är Bamse?','Björn','Film & TV'],
+  ['Vad heter musen med stora runda öron och röda byxor?','Musse Pigg','Film & TV'],
+  ['Vad heter Kalle Ankas tre brorsöner?','Knatte, Fnatte och Tjatte','Film & TV'],
+  ['Vilket svartvitt djur bor i Kina och äter bambu?','Pandan','Världen'],
+  ['Var bor isbjörnen?','Vid Nordpolen','Världen'],
+  ['Vilket djur har puckel och bor i öknen?','Kamelen','Världen'],
+  ['Vad heter ett stort och torrt ställe med nästan bara sand?','Öken','Världen'],
+  ['Smakar vattnet i havet salt eller sött?','Salt','Världen'],
+  ['Vilken sång sjunger man när någon fyller år?','Ja må du leva','Musik'],
+  ['Vilket instrument har vita och svarta tangenter?','Piano','Musik'],
+  ['Vilket instrument slår man på med pinnar?','Trumma','Musik'],
+  ['Vilket djur klättrar i sången Imse vimse?','Spindeln','Musik'],
+  ['Vilka djur sjunger man om när man hoppar runt midsommarstången?','Små grodorna','Musik'],
+  ['Vad hade riddare på sig för att skydda sig?','Rustning','Historia'],
+  ['Vilka stora djur levde för jättelänge sedan och finns inte kvar i dag?','Dinosaurier','Historia'],
+  ['Vad heter det stora huset med torn där kungar och drottningar bor?','Slott','Historia'],
+  ['Vad kallas de som seglade långa skepp för länge sedan, för över tusen år sedan?','Vikingar','Historia'],
+  ['Vad tände man för att det skulle bli ljust innan det fanns lampor?','Ljus','Historia'],
+  ['Vad är motsatsen till stor?','Liten','Ord & språk'],
+  ['Vad är motsatsen till varm?','Kall','Ord & språk'],
+  ['Vad säger man när man får en present?','Tack','Ord & språk'],
+  ['Vad säger man när man träffar någon?','Hej','Ord & språk'],
+  ['Vilken sak har man på huvudet och rimmar på katt?','Hatt','Ord & språk'],
+  ['Vad har man på sig i bilen för att sitta säkert?','Bilbälte','Svenskt påhitt'],
+  ['Vad drar man upp för att stänga jackan?','Blixtlåset','Svenskt påhitt'],
+  ['Vad heter den stora möbelaffären som är blå och gul?','IKEA','Svenskt påhitt'],
+  ['Vilken bulle med kanel har en egen dag i oktober?','Kanelbulle','Svenskt påhitt'],
+  ['Vad bygger man med räls av trä från Brio?','Tågbana','Svenskt påhitt'],
+  ['Vad lyser på himlen på natten och kan vara rund som en boll?','Månen','Rymden'],
+  ['Vad är varmt och lyser på himlen på dagen?','Solen','Rymden'],
+  ['Vad heter de små lysande prickarna på himlen på natten?','Stjärnor','Rymden'],
+  ['Vad kallas den som åker ut i rymden?','Astronaut','Rymden'],
+  ['Vad åker man ut i rymden med?','Raket','Rymden'],
+  ['Vad hör man med?','Öronen','Kroppen'],
+  ['Vad luktar man med?','Näsan','Kroppen'],
+  ['Vilken gul frukt är jättesur?','Citron','Mat & dryck'],
+  ['Vilket djur kommer mjölken ifrån?','Kon','Mat & dryck'],
+  ['Vad ringer man med?','Telefon','Teknik & prylar'],
+  ['Vad tänder man när det är mörkt i rummet?','Lampan','Teknik & prylar'],
+  ['Vad tar man foton med?','Kamera','Teknik & prylar'],
+  ['Vad heter maten som är en rund deg med tomat och ost på?','Pizza','Mat & trender'],
+  ['Vad är kallt och sött och äts i en strut?','Glass','Mat & trender'],
+  ['Vad mixar man för att göra en smoothie?','Frukt','Mat & trender'],
+  ['Vilken mat är långa tunna trådar som man äter med köttfärssås?','Spagetti','Mat & trender'],
+  ['Vilka små blå bär växer i skogen?','Blåbär','Mat & trender'],
+  ['Vad heter tävlingen på tv där man sjunger och alla röstar på bästa låten?','Melodifestivalen','Musik idag'],
+  ['Vad håller man i när man sjunger på en scen?','Mikrofon','Musik idag'],
+  ['Vad gör man när man rör sig till musik?','Dansar','Musik idag'],
+  ['Vad har man på öronen för att lyssna på musik?','Hörlurar','Musik idag'],
+  ['Vad heter Elsas låt i Frost?','Slå dig fri','Musik idag'],
+  ['Vilken maskin tvättar kläder?','Tvättmaskin','Vardagsteknik'],
+  ['Var lägger man maten så att den håller sig kall?','Kylskåp','Vardagsteknik'],
+  ['Vilken maskin suger upp damm från golvet?','Dammsugare','Vardagsteknik'],
+  ['Vad värmer man mat snabbt i?','Mikrovågsugn','Vardagsteknik'],
+  ['Vad rostar man bröd i?','Brödrost','Vardagsteknik'],
+  ['Vad sparkar man på i fotboll?','Bollen','Sport'],
+  ['Vad gör man i en simbassäng?','Simmar','Sport'],
+  ['Vad ska man ha på huvudet när man cyklar?','Hjälm','Sport'],
+  ['Vad slår man bollen med i tennis?','Racket','Sport'],
+  ['Var ska bollen i basket?','I korgen','Sport'],
+  ['Var kan man titta på videoklipp, i appen med ett rött tecken och en vit triangel?','Youtube','Appar & internet'],
+  ['Vad måste man göra med surfplattan när batteriet är slut?','Ladda den','Appar & internet'],
+  ['Vad gör man med kameran i telefonen?','Tar bilder','Appar & internet'],
+  ['Vad heter det när man ringer och ser varandra i telefonen?','Videosamtal','Appar & internet'],
+  ['Vad trycker man på skärmen med?','Fingret','Appar & internet'],
+  ['I vilket spel bygger man med fyrkantiga block?','Minecraft','Spel & gaming'],
+  ['Vad heter spelet där man skjuter iväg arga fåglar med en slangbella?','Angry Birds','Spel & gaming'],
+  ['Vad slår man för att se hur många steg man får gå i ett spel?','Tärningen','Spel & gaming'],
+  ['Vad heter spelet där man vänder kort och letar efter två likadana?','Memory','Spel & gaming'],
+  ['Vad heter Marios bror i tv-spelen?','Luigi','Spel & gaming']
 ];
 
 /* ===================== Grund ===================== */
-const APP_VERSION = '2.8.1';
+const APP_VERSION = '2.8.2';
 const APP_ID = 'com.mawe.fragekampen';
 /* Omgång 1 ger 100–500, omgång 2 200–1000, omgång 3 300–1500 osv. */
 const MAX_RUNDOR = 4;
@@ -724,8 +824,9 @@ function valjBarn(utom, tema){
   if (S.open && S.open.barn) u.add(S.open.barn.id);
   const alla = barnPool(), fri = alla.filter(f => !u.has(f.id)), ny = f => !D.spelade.has(f.id);
   const iTema = f => samma(f.tema, tema);
-  /* Helst rutans kategori, sedan frågor som passar överallt, sedan vad som helst. */
-  for (const lista of [fri.filter(f => iTema(f) && ny(f)), fri.filter(f => !f.tema && ny(f)), fri.filter(ny), fri.filter(iTema), fri, alla]) {
+  /* Rutans kategori går först, hellre en fråga från ett tidigare spel än en från
+     en annan kategori. Bara när kategorin saknar barnfrågor tas en annan. */
+  for (const lista of [fri.filter(f => iTema(f) && ny(f)), fri.filter(iTema), fri.filter(f => !f.tema && ny(f)), fri.filter(ny), fri, alla]) {
     const f = shuffle(lista.slice())[0];
     if (f) return { id:f.id, q:f.q, a:f.a, tema:f.tema || '' };
   }
@@ -1048,6 +1149,10 @@ function tolkaFragor(text, std){
 function lagaKategorier(){
   return kategorier().filter(k => ospelade(k) < 10).sort((a,b) => ospelade(a) - ospelade(b) || a.t.localeCompare(b.t, 'sv'));
 }
+/* Kategorierna med minst ospelade barnfrågor först. */
+const barnIKat = k => barnPool().filter(f => samma(f.tema, k.t));
+const barnOspeladeIKat = k => barnIKat(k).filter(f => !D.spelade.has(f.id)).length;
+const barnFattiga = n => kategorier().sort((a,b) => barnOspeladeIKat(a) - barnOspeladeIKat(b) || a.t.localeCompare(b.t, 'sv')).slice(0, n).map(k => k.t);
 /* teman: kategorierna barnfrågorna ska höra till. Tom lista = allmänna barnfrågor. */
 function byggBarnPrompt(antal, teman){
   const finns = shuffle(barnPool().filter(f => !teman.length || teman.some(t => samma(t, f.tema))).map(f => f.q)).slice(0, 150);
@@ -1125,7 +1230,7 @@ async function genereraFragor(kat, antal, mal, vem){
       if (!vuxna.length) throw new Error('Alla frågor Gemini föreslog fanns redan eller gick inte att läsa. Försök igen.');
     }
     if (vem !== 'vuxna') {
-      const teman = kat ? [kat] : mal ? mal : vem === 'bada' ? [...new Set(vuxna.map(f => f.kat))] : [];
+      const teman = kat ? [kat] : mal ? mal : vem === 'bada' ? [...new Set(vuxna.map(f => f.kat))] : barnFattiga(Math.max(1, Math.ceil(antal / 5)));
       const nB = vem === 'barn' ? antal : Math.max(5, Math.round(antal / 2));
       GEN.text = (vuxna.length ? vuxna.length + ' frågor klara. ' : '') + 'Skriver barnfrågor…'; render(true);
       try {
@@ -1401,7 +1506,7 @@ function bankHTML(){
   const harEgenNyckel = !!lsGet('fk-gemini', '');
   return `<section class="panel"><h2>Frågebanken</h2>
     <p class="note"><b>${ospeladeTotalt()}</b> av ${pool().length} frågor är ospelade · ${INBYGGDA.length} inbyggda, ${egna} egna · ${D.slangda.size} slängda · ${kats.length} kategorier</p>
-    <p class="note">Barnfrågor (3–6 år): <b>${barnOspelade()}</b> av ${barnPool().length} ospelade, ${barnPool().filter(f => !f.tema).length} av dem passar alla kategorier. Ett barn får helst en barnfråga i rutans kategori.</p>
+    <p class="note">Barnfrågor (3–6 år): <b>${barnOspelade()}</b> av ${barnPool().length} ospelade. Ett barn får en barnfråga i rutans kategori.${(() => { const utan = kats.filter(k => !barnIKat(k).length); return utan.length ? ` <b>Utan barnfrågor:</b> ${esc(utan.map(k => k.t).join(', '))}. Välj kategorin och Bara barn för att skapa.` : ''; })()}</p>
     <div class="split">
       <div class="panel" style="padding:16px;gap:12px">
         <h3>Skapa fler frågor</h3>
@@ -1413,7 +1518,7 @@ function bankHTML(){
             <select id="gen-antal"><option>10</option><option selected>20</option><option>30</option></select></label>
           <label class="field" for="gen-vem">Frågor för
             <select id="gen-vem"><option value="bada" selected>Vuxna och barn</option><option value="vuxna">Bara vuxna</option><option value="barn">Bara barn (3–6 år)</option></select>
-            <small>Med barn blir det också hälften så många barnfrågor i samma kategorier.</small></label>
+            <small>Vuxna och barn ger också hälften så många barnfrågor i samma kategorier. Bara barn med Blandat fyller på de kategorier som har minst barnfrågor.</small></label>
         </div>
         <label class="check" for="gen-fyll"><input type="checkbox" id="gen-fyll"><span>Fyll bara på tomma eller nästan slut kategorier</span>
           <small>${(() => { const l = lagaKategorier(); return l.length ? 'Just nu: ' + l.slice(0, 6).map(k => `${esc(k.t)} (${ospelade(k)})`).join(', ') + (l.length > 6 ? ' …' : '') : 'Alla kategorier har minst 10 ospelade just nu.'; })()}</small></label>
@@ -1595,7 +1700,7 @@ document.addEventListener('click', e => {
       const kat = document.getElementById('gen-ny').value.trim() || document.getElementById('gen-kat').value;
       const antal = +document.getElementById('gen-antal').value || 20;
       const vem = document.getElementById('gen-vem').value || 'bada';
-      if (!kat && document.getElementById('gen-fyll').checked) {
+      if (!kat && vem !== 'barn' && document.getElementById('gen-fyll').checked) {
         const mal = lagaKategorier().slice(0, Math.max(1, Math.floor(antal / 5))).map(k => k.t);
         if (!mal.length) { GEN = { kor:false, text:'Alla kategorier har minst 10 ospelade frågor, så det finns inget att fylla på.', nya:[] }; render(true); return; }
         genereraFragor('', antal, mal, vem); return;
